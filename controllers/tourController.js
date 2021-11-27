@@ -66,7 +66,8 @@ exports.getAllTours = async (req, res) => {
       data: {
         tours   
       }
-  });}
+  });
+  }
   catch(e) {
     res.status(404).json({
       status:"faild",
