@@ -13,15 +13,64 @@ const toursSchema = new mongoose.Schema({
     required:[ true, "A tour must have a name" ], 
     unique:true
   },
-  rating:{
+  duration:{
+    type:Number,
+    required:[ true, "A tour must have a duration" ], 
+  },
+  maxGroupSize:{
+    type:Number,
+    required:[ true, "A tour must have a group size" ], 
+  },
+  difficulty:{
+    type:String,
+    //an validator will be added soon to check what type of difficulty
+  },
+    //thoes ratings are going to be calculated from the real reviews
+  ratingAverage:{
     type:Number,
     default:4.5
   },
+  ratingQuantity:{
+    type:Number,
+    default:0
+  },
   price:{
     type:Number,
-    required:true
-  }
+    required:[ true, "A tour must have a price" ], 
+  },
+  priceDiscount:{
+    type:Number,
+  },
+  summary:{
+    type:String,
+    //there are diffrent schema types for diffrent type and for string we have a schema type which is trim which will remove all the whitespace from the beginning and the end of the string
+    trim:true,
+    required:[ true, "A tour must have a description" ], 
+  }, 
+  description:{
+    type:String, 
+    trim:true
+  },
+  imageCover:{
+  //we will basically store just the refrence of the image in the database which is a very common practice
+  //we simply leave the images somewhere in the filesystem and then put the name of the image itself in the database as a field
+    type:String, 
+    required:[ true, "A tour must have a cover image" ], 
+  },
+  image:{
+  //we want to store the images as an array of strings
+    type:[String],
+    //more will be added soon
+  },
+  createdAt:{
+  //this will basically be a timestanp that is set by the time that the user gets a new tour and it must be added automatically at the time the tour is created
+    type:Date, 
+    default:Date.now(),
+  },
+  startDates:[Date],
+  
 });
+
 //after creating a schema we will then create a model 
 
 
