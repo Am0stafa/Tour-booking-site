@@ -8,6 +8,11 @@ const router = express.Router();
 // router.param('id', tourController.checkID);
 
 router
+  .route('/top-5-cheap')
+  .get(tourController.aliasTopTours, tourController.getAllTours); //inside this our query string must look like this ?limt=5&sort=-rateingAverage,price
+  //this middelware is prefilling the query string for the user so that the user doesn't have to do it on this own
+
+router
   .route('/')
   .get(tourController.getAllTours)
   .post(tourController.createTour)

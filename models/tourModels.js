@@ -66,16 +66,13 @@ const toursSchema = new mongoose.Schema({
   //this will basically be a timestanp that is set by the time that the user gets a new tour and it must be added automatically at the time the tour is created
     type:Date, 
     default:Date.now(),
+    select:false
   },
   startDates:[Date],
   
 });
 
-//after creating a schema we will then create a model 
-
-
-
-//creating a model from the schema 
+//after creating a schema we will then create a model from the schema
 
 //here it takes the name of the model and the schema that we created and this will return an object which we can use to make documents
 const Tour = mongoose.model('Tour', toursSchema);
