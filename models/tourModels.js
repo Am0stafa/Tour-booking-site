@@ -63,7 +63,7 @@ const toursSchema = new mongoose.Schema({
     //more will be added soon
   },
   createdAt:{
-  //this will basically be a timestanp that is set by the time that the user gets a new tour and it must be added automatically at the time the tour is created
+  //this will basically be a timestamp that is set by the time that the user gets a new tour and it must be added automatically at the time the tour is created
     type:Date, 
     default:Date.now(),
     select:false

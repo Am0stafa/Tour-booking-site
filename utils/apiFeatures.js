@@ -1,5 +1,5 @@
 class APIFeatchers{
-    //^what we will pass in our constractor in the mongoose query which is created from the tours model so we will pass it like this eg.(Tours.find()) to create a basic query and also the query string that we get from express the req.query which is available only in the req res cycle
+  //^what we will pass in our constractor in the mongoose query which is created from the tours model so we will pass it like this eg.(Tours.find()) to create a basic query and also the query string that we get from express the req.query which is available only in the req res cycle
     constructor(query , queryString){
     //*we are passing the query here because ww dont want to query inside of the class as this will bound this class to the tour resource which will not make it as reusable  
       
@@ -69,7 +69,7 @@ class APIFeatchers{
       //in projecting(selecting) we need it to be done in this way (query.select('name price age')) separated by a space but it it is passed to us in this way {price,raingsAverage}  //!need to be passed as a string separated by space
       if(this.queryString.fields){
         const fields = this.queryString.fields.split(',').join(' ');
-        this.query = this.query.sort(fields);
+        this.query = this.query.select(fields);
       }
       
   

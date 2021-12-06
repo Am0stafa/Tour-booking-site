@@ -161,11 +161,17 @@ try{
 
 };
 
-//!using aggrigation pipeline i made a function which calculate a couple of statistics about our tours
+//!using aggrigation pipeline I made a function which calculate a couple of statistics about our tours
+
+
+
+//& important disclaimer the $ is used beside the operators and along with operator followed a document only'$doc_name'
 
 
 exports.getTourStats = async (req, res) => {
     //after this one we need to add a new route
+    
+    
   try{
     //aggregate is a bit like a normal query but the diffrence is that we can manipulate the data
     //we pass the aggrigate function which //? firstly takes an array of so called stages which will contain many states and then the document pass throug these stages one by one step by step in the defined sequence as we define it
@@ -180,10 +186,11 @@ exports.getTourStats = async (req, res) => {
      $group:{
       //^what we will do here is caluclate the average rating ,average price, minPrice ,maxPrice...
       //?the first thing we need to specify is the id as this is where we are going to specify what we want to group by
-      _id:'$difficulty', //!null as we want to have every thing in one group so that we can calculate the statistics for all of the tours togethers and not separated by groups, If you want for a specific field use the name of it in '$name'
+      
+      _id:'null', //! null as we want to have every thing in one group so that we can calculate the statistics for all of the tours togethers and not separated by groups, If you want for a specific field use the name of it in '$name'
       
       //calculating the average
-      //^the avg,min is an mathicamtical opertaor which we pass to it the field name between ''
+      //^ the avg,min is an mathicamtical opertaor which we pass to it the field name between ''
       avgRating:{$avg:'$ratingAverage'},
       avgPrice:{$avg:'$price'},
       minPrice:{$min:'$price'},
@@ -196,11 +203,12 @@ exports.getTourStats = async (req, res) => {
       //&which field to sort by and now we will no longer be able to use the old documents name we will only be able to use the name specified above
       $sort:{avgPrice:1 }
     },
-    
+      
     
     
     ]); 
     
+    //sending the result
     res.status(200).json({
       status: 'success',
       data: {
@@ -217,4 +225,94 @@ exports.getTourStats = async (req, res) => {
     })
   }
   
+}
+
+//! I highly recommend watching video 102 again as it is very triky
+
+//this is another aggrigation pipeline to find out the busiest month in the year
+//we basically want to count how many tours there are for each of the month in a given year
+//! we will do that with the help of start dates in our database which contain for each tour the monthes that it started so for example we may have one tour which have starting date in month 04 06 and the second tour has starting date in month 01 06 so we will be able to conclude that there are two tours in month 06
+
+exports.getMonthlyplan = async (req, res) => {
+  
+  try{
+    //? we difiend a variable in the url and this is how to get it and transform it into a number.
+   const year= req.params.year;
+    
+   const plan = await Tour.aggregate([
+   {
+   //? the easiest way would basically be to have one tour for each of these dates
+   $unwind:'$startDates'
+   //^ unwind basically deconstruct an array field from the impoted doument and then output one document for each element of the array elements so we will have one tour for each of these dates in the array so basically repete the douments for each element in the array
+   
+   },
+   {
+   //? select the doucments for the year that was passed in
+   $match:{
+   //we want it to be between 2021 so it must be between jan 1 and dec 31
+    startDates:{
+    //! AND is denoted by ,
+        $gte: new Date(`${year}-01-01`),
+       $lte: new Date(`${year}-12-31`)
+        
+   }
+   
+   }
+   
+   },
+   {
+    //it is used for calculation
+    $group:{
+      //! now we want to group them by the month but currently we have the entire date
+      //! so from the mongodb aggregation operators documntation we have an date expretion operator which conitain an operaor called $month which extract the month out of our data 
+    _id:{$month:'$startDates'},//group by this expretion,
+    
+    //how many tours start in this month 
+    numTourStarts:{$sum:1},
+    //which tour, this must be an array as how else would we specify two or three diffrent tours in one fields so we will push in the array the name field as each document goes through this pipeline
+    tours:{$push:'$name'},
+    
+    }
+  
+   
+   },
+   
+   {
+   //this is to and onther field just like the id above but with diffrent name and make as a new spearate field
+    $addFields:{month:'$_id'}
+   },
+   {
+   //after making the above field now we no longer need the id fe 7aga so to remove it use project which take 1 and 0 to either show or not
+   $project:{_id:0}
+   },
+   {
+    $sort: { numTourStarts: -1 }
+  },
+  {
+    $limit: 12
+  }
+   
+   
+   ]);
+  
+  //sending the result
+   res.status(200).json({
+    status: 'success',
+    results: plan.length,
+    data: {
+      plan:plan
+    }
+  });
+  
+  
+  
+  
+  }catch(err){
+    res.status(404).json({
+      status: 'error',
+      message: err.message,
+      anotherMassage:"invalid data send!"
+    })
+  }
+
 }
