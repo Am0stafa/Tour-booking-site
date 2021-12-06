@@ -6,7 +6,9 @@ const mongoose = require('mongoose');
 
 
 //create a schema
-const toursSchema = new mongoose.Schema({
+const toursSchema = new mongoose.Schema(
+//!we can pass in not only the object with the schema definition BUT also objects for the schema options.
+{
   name:{
     type:String,
           //required or not and the error string
@@ -70,7 +72,25 @@ const toursSchema = new mongoose.Schema({
   },
   startDates:[Date],
   
+},
+{
+//this here sayes that each time the data is actually outputted as JSON or Object we want virtuals to be part of thr output 
+    toJSON:{virtuals:true},
+    toObject:{virtuals:true},
 });
+
+//? virtual properties are basically fields that we can define on our schema but it will not be presisted so they will not be saved into the database in order to save us some space this make sence for fields that can be derived from one another like convertions from mile to km. AND we need to explicitly define in our schema that we want the virtual properties.the downside of virtual is that we wont be able to us this virtual object in a query.
+
+//? this virtual propertie contains the tour duration in weeks which can be converted from the duration that we already have in days
+//^ we then define the get method as this virtual property will basically be created each time that we get some data out of the database and will not be presisted in the database but it is only going to be there as soon as we get data+ we didnt use arrow function as we need this keyword which couldnt get from a normal arrow function
+
+toursSchema.virtual('durationWeek').get(function(){
+  return this.duration /7;
+})
+
+
+
+
 
 //after creating a schema we will then create a model from the schema
 
@@ -80,9 +100,6 @@ const Tour = mongoose.model('Tour', toursSchema);
 //we want to export the model from this file to be used in the tour controller where we will query and delete and update and create tours basically do CRUD operations.
 
 module.exports = Tour;
-
-
-
 
 
 //An example of the way we make documents in the controller files:

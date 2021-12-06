@@ -293,7 +293,7 @@ exports.getMonthlyplan = async (req, res) => {
   }
    
    
-   ]);
+  ]);
   
   //sending the result
    res.status(200).json({
