@@ -1,9 +1,10 @@
-//in this file we keep our schema and model and export the model
+//! in this file we keep our schema and model and export the model
 
 const mongoose = require('mongoose');
 
 
-
+//we will use the slugify package which allows us to put a string in the url based on some string
+const slugify = require('slugify');
 
 //create a schema
 const toursSchema = new mongoose.Schema(
@@ -14,6 +15,8 @@ const toursSchema = new mongoose.Schema(
           //required or not and the error string
     required:[ true, "A tour must have a name" ], 
     unique:true
+  },
+  slug:{
   },
   duration:{
     type:Number,
@@ -90,9 +93,34 @@ toursSchema.virtual('durationWeek').get(function(){
 
 
 
+//* mongoose middlewares: just like express we can use mongoose middlewares to make something happen between two events for example each time a new document is saved to database we can run a function between the save command and the acctual saving of the document thats also why mongooes middlewares are some times called pre and post hooks as we can run a function before or after an event. middlewares are defined on the schema
+//? there are four types of middlewares in mongoose: document query aggregate and model.
+
+//! 1)Document 
+
+//? document middleware: it is a middleware that can act on the currently proccessed document
+//^ this will run before an event and the event is then specified inside('')
+
+toursSchema.pre('save',function(next){
+
+//this will run before document is saved to the database so it will be triggered when .save() and .create() but not on insert
+//^ this will return us the data that is going to the database allowing us to act on the data before it id then saved
+//? we will create a slug for each of the documents
+    //this contains our document and the slugify taked the string that we want to create a slug out of
+      this.slug = slugify(this.name, {lower:true});
+  //next to call the next middleware in the stack
+  next();
+})
+
+//in post we have access to the saved document but in the callback function not by using this keyword
+  // toursSchema.post('save',function(doc,next){
+    
+  // }
+  
 
 
-//after creating a schema we will then create a model from the schema
+
+//after creating a schema, virtual properties , middlewares we will then create a model from the schema
 
 //here it takes the name of the model and the schema that we created and this will return an object which we can use to make documents
 const Tour = mongoose.model('Tour', toursSchema);
@@ -100,6 +128,15 @@ const Tour = mongoose.model('Tour', toursSchema);
 //we want to export the model from this file to be used in the tour controller where we will query and delete and update and create tours basically do CRUD operations.
 
 module.exports = Tour;
+
+
+
+
+
+
+
+
+
 
 
 //An example of the way we make documents in the controller files:
