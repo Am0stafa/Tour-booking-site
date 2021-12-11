@@ -3,7 +3,7 @@
 const mongoose = require('mongoose');
 
 
-//we will use the slugify package which allows us to put a string in the url based on some string
+//we will use the slugify package which allows to take a copy of a certain string an make it as a kebab casing to be used in the url
 const slugify = require('slugify');
 
 //create a schema
@@ -50,7 +50,7 @@ const toursSchema = new mongoose.Schema(
     type:String,
     //there are diffrent schema types for diffrent type and for string we have a schema type which is trim which will remove all the whitespace from the beginning and the end of the string
     trim:true,
-    required:[ true, "A tour must have a description" ], 
+    required:[ true, "A tour must have a description" ]
   }, 
   description:{
     type:String, 
@@ -74,6 +74,10 @@ const toursSchema = new mongoose.Schema(
     select:false
   },
   startDates:[Date],
+  secretTour:{
+    type:Boolean, 
+    default:false,
+  },
   
 },
 {
@@ -104,7 +108,7 @@ toursSchema.virtual('durationWeek').get(function(){
 toursSchema.pre('save',function(next){
 
 //this will run before document is saved to the database so it will be triggered when .save() and .create() but not on insert
-//^ this will return us the data that is going to the database allowing us to act on the data before it id then saved
+//^ this keyword will return us the data that is going to the database allowing us to act on the data before it id then saved
 //? we will create a slug for each of the documents
     //this contains our document and the slugify taked the string that we want to create a slug out of
       this.slug = slugify(this.name, {lower:true});
@@ -112,12 +116,35 @@ toursSchema.pre('save',function(next){
   next();
 })
 
-//in post we have access to the saved document but in the callback function not by using this keyword
-  // toursSchema.post('save',function(doc,next){
-    
-  // }
-  
 
+
+
+//! 2)Query middleware
+
+//* the use case that we are going to implement here is that we want to have secret tours in our database for vip people hence we dont want to appear in the result output so we will make it so that it only query for tours that are not secret. 
+
+//^ a problem that we will face is that this will only work with find not ex findOne find... so to solve this problem we used regular expretion to make it work with any thing containg find
+
+toursSchema.pre(/^find/,function(next){
+//the diffrence so fare is that the this keyword is now pointing to a query no a document
+
+//this will manipulate the queryString removing all the secret tours 
+  this.find({ secretTour:{ $ne:true } });
+this.start = Date.now();
+
+next();
+})
+
+
+//* here we are making a clock that calculate how long it will take to execute the query
+
+toursSchema.pre(/^find/,function(docs,next){
+//here the this keyword will return us all the documents that will return from the query as the query has been finished.
+
+console.log(`Query took ${Date.now() - this.start} milisec`);
+
+next();
+})
 
 
 //after creating a schema, virtual properties , middlewares we will then create a model from the schema
