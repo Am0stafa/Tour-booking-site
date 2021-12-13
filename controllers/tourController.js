@@ -113,6 +113,7 @@ try{
   //here it taked three params 1st: querery , 2nd:the data that is going to be updated and this data can be found in the body , 3rd: some other options check the options on the documnetation.  
   const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
+    //so when updating it will follow our data validation that is set in our schema
     runValidators: true
   });
     res.status(200).json({
@@ -236,7 +237,7 @@ exports.getMonthlyplan = async (req, res) => {
   
   try{
     //? we difiend a variable in the url and this is how to get it and transform it into a number.
-   const year= req.params.year;
+   const year= +req.params.year;
     
    const plan = await Tour.aggregate([
    {

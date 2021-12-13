@@ -6,15 +6,25 @@ const mongoose = require('mongoose');
 //we will use the slugify package which allows to take a copy of a certain string an make it as a kebab casing to be used in the url
 const slugify = require('slugify');
 
+const validators = require('validator');
 //create a schema
 const toursSchema = new mongoose.Schema(
 //!we can pass in not only the object with the schema definition BUT also objects for the schema options.
 {
   name:{
     type:String,
-          //required or not and the error string
+    //required or not and the error string
     required:[ true, "A tour must have a name" ], 
-    unique:true
+    unique:true,
+    //trim ensure that the data entered is formated nicely eg "  abdo" will be formated into "abdo"
+    trim:true,
+    maxlength:[255, "Tour name must not have more than 255 characters"],
+    minlength:[5, "Tour name must have more than 5 characters"],
+  //   validate: {
+  //     validator: (val) =>
+  //         validators.isAlpha(val, ["en-US"], { ignore: " " }),
+  //     message: "A tour must only  contain characters",
+  // }
   },
   slug:{
   },
@@ -28,12 +38,18 @@ const toursSchema = new mongoose.Schema(
   },
   difficulty:{
     type:String,
-    //an validator will be added soon to check what type of difficulty
+    //we only want the deificulty to be between only three values to we will make an enum just like in java
+    enum:{
+      values: ['easy', 'medium', 'difficult'],
+      message:'dificulty is either :easy, medium, difficult'
+    }
   },
     //thoes ratings are going to be calculated from the real reviews
   ratingAverage:{
     type:Number,
-    default:4.5
+    default:4.5,
+    min:[1, "rating must be above one"],
+    max:[5,"rating must be below 5"]
   },
   ratingQuantity:{
     type:Number,
@@ -45,6 +61,18 @@ const toursSchema = new mongoose.Schema(
   },
   priceDiscount:{
     type:Number,
+    //^a validator is just a function which return either true or false and in case it returns false then it means that there is an error and if true that means that the validation is correct and the input can be accepted, no arrow function to use this keyword
+    //*if the price discount is lower than the price itself
+  validate:{
+  
+    validator:function(value){ 
+      //! this keyword point to the current document when we are creating a new document so it wont work on update
+      return value < this.price //100 < 200 return true so no validation will be triggered
+      //custom message
+    },
+    message:'dicount is larger than the price'
+  
+  }
   },
   summary:{
     type:String,
@@ -138,13 +166,32 @@ next();
 
 //* here we are making a clock that calculate how long it will take to execute the query
 
-toursSchema.pre(/^find/,function(docs,next){
+toursSchema.post(/^find/,function(docs,next){
 //here the this keyword will return us all the documents that will return from the query as the query has been finished.
 
 console.log(`Query took ${Date.now() - this.start} milisec`);
 
 next();
-})
+});
+
+
+//! aggregation middleware
+
+//*we also want to execlude all the secret tours from the aggrigation as well
+
+toursSchema.pre('aggregate',function(next) {
+
+  //^ this.pipeline() return us the aggrigation pipeline which is the array which we passed into the aggregate function
+  //^ unlike the find to filter out the secret tours we will add another match stage at the beginning of the pipeline array
+  //^ it is fine to as many match stages.
+  this.pipeline().unshift({ $match:{secretTour:{ $ne:true }} }) ; 
+  
+  next();
+});
+
+
+
+
 
 
 //after creating a schema, virtual properties , middlewares we will then create a model from the schema
