@@ -1,9 +1,10 @@
 class AppError extends Error {
     constructor(message, statusCode) {
-      super(message);
+      super(message)
       //* we make this variable so that later we can then test for this property and only send error message back to the client for these operational errors
   
       this.statusCode = statusCode;
+      //to transform it into string
       this.status = `${statusCode}`.startsWith('4') ? 'fail' : 'error';
       this.isOperational = true;
   

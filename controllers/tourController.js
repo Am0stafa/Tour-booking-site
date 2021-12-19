@@ -1,5 +1,6 @@
 
 //we will import the tour model here which we made after creating the schema in the models file and this will be used to do CRUD opertaions 
+const AppError = require('../utils/appError');
 const Tour = require('./../models/tourModels')
   
 //middelware that interrupt the request from the tourRout for the well known routes to change the fields
@@ -47,7 +48,7 @@ exports.getAllTours = async (req, res) => {
   }
 };
 
-exports.getTour =async (req, res) => {
+exports.getTour =async (req, res,next) => {
  
   try{
     //here it will take req.params.the name of the route in the route file and findById only expect to take the id we are  looking for
@@ -55,6 +56,8 @@ exports.getTour =async (req, res) => {
     //findById works the same way as 
     //Tour.find({ _id:req.params.id })
     
+    //^ to handel the error mentioned below
+    if(!tour) throw new AppError("invaild id", 404)
     
     res.status(200).json({
       status: 'success',
@@ -65,17 +68,23 @@ exports.getTour =async (req, res) => {
   
   
   }catch(err){
-    res.status(404).json({
-      status:"faild",
-      message:err
+    next(err)
+    // res.status(404).json({
+    //   status:"faild",
+    //   message:err
     
-    })
+    // })
+    //! here we have a logical error which is that only when we pass invalid query params which mongooes wont be able to recognize only then it will throw an error, but if we passed an invalid id it will run successful but returning null.
   }
 
 
 };
 
-exports.createTour = async (req, res) => {
+const catchAsync = (func) => {
+
+}
+
+exports.createTour = async (req, res,next) => {
   // console.log(req.body);
   try{
   
@@ -86,24 +95,26 @@ exports.createTour = async (req, res) => {
     data: {
       tour: newTour
     }
-});}
-
-
+});
+}
 //in this we catch the data validation error
 catch(err){
   
-  res.status(400).json({
-    status: 'error',
-    message: err.message,
-    anotherMassage:"invalid data send!"
-  })
+  //this here is a cleaner way of doing this
   
+  next(err);
   
+  // res.status(400).json({
+  //   status: 'error',
+  //   message: err.message,
+  //   anotherMassage:"invalid data send!"
+  // })
+ 
 }
 
 };
 
-exports.updateTour = async (req, res) => {
+exports.updateTour = async (req, res,next) => {
 
 
 try{
@@ -116,6 +127,8 @@ try{
     //so when updating it will follow our data validation that is set in our schema
     runValidators: true
   });
+  if(!tour) throw new AppError("invaild id", 404)
+
     res.status(200).json({
       status: 'success',
       data: {
@@ -125,19 +138,21 @@ try{
 
 }
   catch(err){
-    res.status(400).json({
-      status: 'error',
-      message: err.message,
-      anotherMassage:"invalid data send!"
-    })
+    next(err)
+    // res.status(400).json({
+    //   status: 'error',
+    //   message: err.message,
+    //   anotherMassage:"invalid data send!"
+    // })
     
   }
 };
 
-exports.deleteTour = async (req, res) => {
+exports.deleteTour = async (req, res,next) => {
 
 try{
   const tour = await Tour.findByIdAndDelete(req.param.id,req.body);
+  if(!tour) throw new AppError("invaild id", 404)
 
 //it is common that when deleteing that we dont send back any data to the client and the 204 is a standered
     res.status(204).json({
@@ -150,11 +165,12 @@ try{
 
 }catch(err){
 
-  res.status(404).json({
-    status: 'error',
-    message: err.message,
-    anotherMassage:"invalid data send!"
-  })
+  next(err);
+  // res.status(404).json({
+  //   status: 'error',
+  //   message: err.message,
+  //   anotherMassage:"invalid data send!"
+  // })
 
 }
 
