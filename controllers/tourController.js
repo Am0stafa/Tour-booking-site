@@ -159,9 +159,6 @@ try{
       status: 'success',
       data: "delete successful"
     });
-  
-
-
 
 }catch(err){
 

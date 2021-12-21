@@ -1,3 +1,5 @@
+const AppError = require("../utils/appError");
+
  //* we will pass it 4 arguments so that express know that it's an error handling middleware and call it when there is an error
 module.exports = (err, req, res, next)=>{
   
@@ -6,9 +8,57 @@ module.exports = (err, req, res, next)=>{
     err.statusCode = err.statusCode ?? 500;
     err.status = err.status ?? 'error'; //as error is when we have a 500 and fail when we have a 400
         
-        res.status(err.statusCode).json({
-          status: err.status, 
-          message: err.message,
-         // useless:"this error has been handeled by the middleware"
-        });
+    if(process.env.NODE_ENV === 'development') 
+       sendErrorDev(err, res);
+    else if (process.env.NODE_ENV === 'production'){
+      //to take a copy not a refrence
+      let ourError = {...err}
+      
+      //a problem that we have is that an error from mongodb will be not be marked as operational although it is and we dont want it to be send to user as programming error so to solve this problem we can use a err.name 
+      if(err.name === 'CastError')
+      ourError = handelCastErrorDB(ourError)
+      
+      sendErrorProd(ourError,res)
+    
+    
+    }
+       
 }
+//! we want to distingues between the errors in devlopment and errors in production to send out different data
+
+const sendErrorDev = (err, res) => {
+  res.status(err.statusCode).json({
+    status: err.status,
+    error: err,
+    message: err.message,
+    stack: err.stack
+  });
+};
+//^ if we are in production we want to leck as little information as possible
+
+const sendErrorProd = (err, res)=>{
+//* we want to send operational erros only (invalid path)                           
+  if(err.isOperational){
+  res.status(err.statusCode).json({
+    status: err.status, 
+    message: err.message,
+  });
+ }
+//* programming or other unknown error:we don't want to leak error details(await without async)
+ else{
+    console.error('Error');
+ 
+    res.status(err.statusCode).json({
+      message:"something went wrong",
+      status:"error"
+        
+    });
+  }
+
+}
+
+//* this function takes the error as an input and output a new AppError message which contain the is operational to true
+const handelCastErrorDB = (err)=>{
+  let message = `Invalid ${err.path}: ${err.value}`
+  return new AppError(message,400);
+};
