@@ -16,9 +16,13 @@ module.exports = (err, req, res, next)=>{
       
       //a problem that we have is that an error from mongodb will be not be marked as operational although it is and we dont want it to be send to user as programming error so to solve this problem we can use a err.name 
       if(err.name === 'CastError')
-      ourError = handelCastErrorDB(ourError)
+      ourError = handelCastErrorDB(ourError);
+      //duplicate values also have diffrent sign in this case the code
+      if (error.code === 11000) error = handleDuplicateFieldsDB(error);
+
       
-      sendErrorProd(ourError,res)
+      
+      sendErrorProd(ourError,res);
     
     
     }
@@ -37,7 +41,7 @@ const sendErrorDev = (err, res) => {
 //^ if we are in production we want to leck as little information as possible
 
 const sendErrorProd = (err, res)=>{
-//* we want to send operational erros only (invalid path)                           
+//* we want to send operational erros only (invalid path) && database problems                           
   if(err.isOperational){
   res.status(err.statusCode).json({
     status: err.status, 
@@ -61,4 +65,13 @@ const sendErrorProd = (err, res)=>{
 const handelCastErrorDB = (err)=>{
   let message = `Invalid ${err.path}: ${err.value}`
   return new AppError(message,400);
+};
+
+const handleDuplicateFieldsDB = err => {
+  //when it return it will return an array conting usless data execpt for the first one 
+  const value = err.errmsg.match(/(["'])(\\?.)*?\1/)[0];
+  console.log(value);
+
+  const message = `Duplicate field value: ${value}. Please use another value!`;
+  return new AppError(message, 400);
 };
