@@ -23,10 +23,22 @@ mongoose.connect(DB , {
 });
 
 
-
+//here we want to handel any promise rejection that we might not catch like database failed to conncet so it is a "safety net"
+//* we are basically listening to unhandled Rejection event which allow us to handel all the errors that occur in ASYNCHRONOUS 
+process.on('unhandledRejection', (err)=>{
+  console.log(err.name +" "+ err.message)
+  console.log('unhandled rejection. process termination')
+  //! we want to termenate the application after that
+  //^ this is a less aggressive way of closing the server as we will give the server time to finish all the request that are still pending or being handled at the time.
+  server.close(()=>{
+  //here it takes a code 0 for successful 1 for failed
+  process.exit(1)
+  })
+  
+});
 
 
 const port = process.env.PORT || 3000;
-app.listen(port, () => {
+const server = app.listen(port, () => {
   console.log(`App running on port ${port}...`);
 });
