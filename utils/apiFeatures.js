@@ -41,7 +41,7 @@ class APIFeatchers{
       
       //this here means the entire object which has access to these other methods so that we can then call them also to be able to use multiple functions nested
       return this
-    }
+  }
     
     
   sort(){

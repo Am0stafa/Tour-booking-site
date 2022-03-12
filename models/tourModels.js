@@ -119,6 +119,8 @@ const toursSchema = new mongoose.Schema(
 //? this virtual propertie contains the tour duration in weeks which can be converted from the duration that we already have in days
 //^ we then define the get method as this virtual property will basically be created each time that we get some data out of the database and will not be presisted in the database but it is only going to be there as soon as we get data+ we didnt use arrow function as we need this keyword which couldnt get from a normal arrow function
 
+
+//! vid
 toursSchema.virtual('durationWeek').get(function(){
   return this.duration /7;
 })
@@ -128,7 +130,7 @@ toursSchema.virtual('durationWeek').get(function(){
 //* mongoose middlewares: just like express we can use mongoose middlewares to make something happen between two events for example each time a new document is saved to database we can run a function between the save command and the acctual saving of the document thats also why mongooes middlewares are some times called pre and post hooks as we can run a function before or after an event. middlewares are defined on the schema
 //? there are four types of middlewares in mongoose: document query aggregate and model.
 
-//! 1)Document 
+//! 1)Document vid
 
 //? document middleware: it is a middleware that can act on the currently proccessed document
 //^ this will run before an event and the event is then specified inside('')
@@ -168,8 +170,8 @@ next();
 
 toursSchema.post(/^find/,function(docs,next){
 //here the this keyword will return us all the documents that will return from the query as the query has been finished.
-
-console.log(`Query took ${Date.now() - this.start} milisec`);
+  //! in post we cant use this insted it will pass us the document that had been saved (docs)
+console.log(`Query took ${Date.now() - docs.start} milisec`);
 
 next();
 });
@@ -215,14 +217,14 @@ module.exports = Tour;
 
 //An example of the way we make documents in the controller files:
 
-// //create a document from the model in the model file and it is like using javascript function constructor
+ //create a document from the model in the model file and it is like using javascript function constructor
 //       const testTour = new Tour({
 //         name:"the park camper" ,
 //         price: 20
 //       })
 
-// //as this document is an instance of the tour model so it have a couple of methods on it that we can use in order to interact with the database.
-// //this will save it to the tours collection in the database and this save here will return a promise which will give us access to the document that was just saved in the database.
+ //as this document is an instance of the tour model so it have a couple of methods on it that we can use in order to interact with the database.
+ //this will save it to the tours collection in the database and this save here will return a promise which will give us access to the document that was just saved in the database.
 //       testTour.save().then(doc=>{
 //         console.log(doc)
 //       }).catch(err => console.log(err));
