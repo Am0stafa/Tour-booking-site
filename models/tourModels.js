@@ -200,6 +200,8 @@ toursSchema.pre('aggregate',function(next) {
 
 //here it takes the name of the model and the schema that we created and this will return an object which we can use to make documents
 const Tour = mongoose.model('Tour', toursSchema);
+//this represent the instance of that collection so that we can use this to make all the diffrent requests
+
 
 //we want to export the model from this file to be used in the tour controller where we will query and delete and update and create tours basically do CRUD operations.
 
