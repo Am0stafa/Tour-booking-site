@@ -6,7 +6,7 @@ const mongoose = require('mongoose');
 //we will use the slugify package which allows to take a copy of a certain string an make it as a kebab casing to be used in the url
 const slugify = require('slugify');
 
-const validators = require('validator');
+const validator = require('validator');
 //create a schema
 const toursSchema = new mongoose.Schema(
 //!we can pass in not only the object with the schema definition BUT also objects for the schema options.

@@ -20,6 +20,8 @@ mongoose.connect(DB , {
 //this line has access to the password
 //  console.log(con.connections);
   console.log("DB is connection successful");
+}).catch(err=>{
+  console.log(err)
 });
 
 
