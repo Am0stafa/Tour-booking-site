@@ -1,5 +1,6 @@
 const express = require('express');
 const tourController = require('../controllers/tourController');
+const authController = require('../controllers/authController')
 
 const router = express.Router();
 
@@ -24,7 +25,8 @@ router
 
 router
   .route('/')
-  .get(tourController.getAllTours)
+  //it will run this middleware first to check if the user is permeted to access this route
+  .get(authController.protect,tourController.getAllTours)
   .post(tourController.createTour)
 
 router

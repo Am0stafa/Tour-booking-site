@@ -22,7 +22,8 @@ const userSchema = new mongoose.Schema({
     password:{
         type:String ,
         required: [true, "A user must have password"],
-        minlength: 8
+        minlength: 8,
+        select:false
     },
     passwordConfirm:{
         type:String,
@@ -66,6 +67,22 @@ userSchema.pre('save',async function(next){
 //3)delete the confirm password
 
 //----------------------------------------------------------------------------
+
+//! Instance method that will be available on each document of this collection and what it will do is take the password that the user entered and hash it and compare it to the password in the related document 
+
+//& usally we use this to refare to the document it is called on but this time as the password is not selected so we cant :(
+
+userSchema.methods.correctPassword = async function(passEntered, userPassword) {
+    //it will return true or false
+    //* compare function hash the password and compare them
+    return await bcrypt.compare(passEntered, userPassword);
+
+}
+//!Now just call it in the login
+
+
+
+
 
 
 

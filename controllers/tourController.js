@@ -2,7 +2,7 @@
 //we will import the tour model here which we made after creating the schema in the models file and this will be used to do CRUD opertaions 
 const AppError = require('../utils/appError');
 const Tour = require('./../models/tourModels')
-  
+
 //middelware that interrupt the request from the tourRout for the well known routes to change the fields
 exports.aliasTopTours = (req, res, next) => {
   req.query.limit = '5';
