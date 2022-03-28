@@ -78,11 +78,18 @@ exports.login = catchAsync(async (req, res, next) => {
 
 //! middleware function to protect certain routes from access incase the user is not logged in 
 exports.protect = catchAsync(async (req, res, next) => {
+    let token =''; 
     
     //^ 1)Get the token and check if its there
-    
-    
-    //^ 2)Validate the token by checking the signature if it is the same therefore check if it is valid or not
+        //? there is a stander when sending JWT in the request header which is to name the key as authorization and the value to start with bearer
+        if(req.headers.authorization && req.headers.authorization.startsWith('Bearer')){
+            //* only in that case we want to save the token and to remove bearer split the array and take the second half
+             token = req.headers.authorization.split(' ')[1]; 
+        }
+        //? and if the token doesnt exist we want to create a new error
+        if(!token) return next(new AppError('You are not logged in please log in to get access',401))
+     
+    //^ 2)Validate the token by checking the signature if it is the same therefore check if it is valid or not so bacially a token where no one tried to change the payload which is the userId in our case
          
           
     //^ 3)Check if the user tring to access the route still exist     
