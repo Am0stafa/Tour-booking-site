@@ -90,16 +90,22 @@ exports.protect = catchAsync(async (req, res, next) => {
         if(!token) return next(new AppError('You are not logged in please log in to get access',401))
      
     //^ 2)Validate the token by checking the signature if it is the same therefore check if it is valid or not so bacially a token where no one tried to change the payload which is the userId in our case
+         //? this function check the signature along with the exipre date and by default return 500 error if any of this doesnt exist else it return id creation date in milisecond
+         const decode = jwt.verify(token,process.env.JWT_SECRET)      
          
-          
     //^ 3)Check if the user tring to access the route still exist     
-         
+         //? get the user from the database as we now have his id
+         const currUser = await User.findById(decode.id);
+         if(!currUser) return next(new AppError('The user no longer exist',401))
    
    //^ 4)Check if the user changed the password after the JWT was issued
-   
-   
+        //? this will be done by an instance method as this belong to the model and not to the controller
+        if(currUser.checkChangePassword(decode.iat))  return next(new AppError('Password was change recently',401))
    
    //^ 5)If all passed then next will be called allowing access to this route
+   
+   //! put the user in the request as it is a middleware
+    req.user = currUser;
     next();
 })
 
