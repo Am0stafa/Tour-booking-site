@@ -19,6 +19,13 @@ const userSchema = new mongoose.Schema({
         type: String ,
         
     },
+    role:{
+        type:String,
+        //! theis user roles will be specific to the application domain
+        enum:['admin', 'guide',"lead-guide","user"],
+        //? default so that we dont have to specify always the user we are creating
+        default:'user'
+    },
     password:{
         type:String ,
         required: [true, "A user must have password"],
@@ -85,12 +92,16 @@ userSchema.methods.correctPassword = async function(passEntered, userPassword) {
 //! another instance method to check if the password is changed
 
 
-userSchema.methods.checkChangePassword = async function(JWTtime) {
+userSchema.methods.checkChangePassword = function(JWTtime) {
     //? we will compare the time it is created and the time the password changed but only if passwordchange field exist as it will only be added only if we changed the password.
+    
     if(this.passwordChangedAt){
        //* as the JWT time will be in milisecond so we will convet ours also to milliseconds 
-        const newTime = parseInt(this.passwordChangedAt.getTime() /1000,10)
-        return newTime>JWTtime
+        const newTime = parseInt(
+            this.passwordChangedAt.getTime() / 1000,
+            10
+          );
+        return JWTtime<newTime
     }
     
     return false;

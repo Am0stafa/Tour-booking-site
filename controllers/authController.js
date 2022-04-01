@@ -1,7 +1,7 @@
 //? in this file, we will have everything related to authentication
 
 const User = require('../models/userModel')
-//rather than surounding with try catch block
+//? rather than surounding with try catch block
 const catchAsync = require('../utils/catchAsync')
 const jwt = require('jsonwebtoken');
 const AppError = require('../utils/appError');
@@ -17,7 +17,8 @@ exports.signup = catchAsync(async (req, res, next) => {
     const newUser = await User.create({name:req.body.name, 
                                        email:req.body.email,
                                        password:req.body.password,
-                                       passwordConfirm:req.body.passwordConfirm});
+                                       passwordConfirm:req.body.passwordConfirm,
+                                       role:req.body.role});
     //*automatically sign in
                                       
     //creating the token by making the payload the id of the user and the securet to be a secret string from the .env, and object of options such as expire time to logout the user after cirtain time as this token wont be valid after time pass also from .env
@@ -100,13 +101,27 @@ exports.protect = catchAsync(async (req, res, next) => {
    
    //^ 4)Check if the user changed the password after the JWT was issued
         //? this will be done by an instance method as this belong to the model and not to the controller
-        if(currUser.checkChangePassword(decode.iat))  return next(new AppError('Password was change recently',401))
+        if(currUser.checkChangePassword(decode.iat)) return next(new AppError('Password was change recently',401))
    
    //^ 5)If all passed then next will be called allowing access to this route
    
-   //! put the user in the request as it is a middleware
+   //! put the user in the request so that we can use it in the next middleware function as we cant get the user by searching by his id which we get from the params
     req.user = currUser;
     next();
 })
+
+//! another middleware function for authorization to restrict certain routes only to certain user roles
+
+//? to be able to pass paramters to a middleware function we will wrap it by a function that will take an undefined number of paramterse and this function will return a middleware function
+exports.restictTo = (...roles) =>{
+    //* roles here will be an array ex ['admin','lead'...]
+    return (req,res,next)=>{
+        //^ if the role is not in the array we dont want to give access to this user and we will get the user from the request and in the previous middleware we inserted the user in the request
+        if(!roles.includes(req.user.role)) return next(new AppError('You have no permissions to perform this action',403))
+        
+        return next();
+    }    
+
+}
 
 
