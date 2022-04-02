@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
 var bcrypt = require('bcryptjs');
-
+const crypto = require('crypto');
 const userSchema = new mongoose.Schema({
     name:{
         type: String ,
@@ -44,7 +44,10 @@ const userSchema = new mongoose.Schema({
             message:"password didnt match"
         } 
     },
-    passwordChangedAt: Date
+    passwordChangedAt: Date,
+    passwordResetToken:String,
+    //! so that the user only have limited time to reset the password
+    passwordResetExpire:Date
 
 })
 
@@ -107,7 +110,28 @@ userSchema.methods.checkChangePassword = function(JWTtime) {
     return false;
 }
 
+//! instance method to generate randome token
 
+userSchema.methods.createPasswordResetToken = function() {
+    //^ the password reset token should be a random string and it need to be cryptographically strong as the password hash.we should never store a plain reset token in theh database
+    
+    //? this will generate a 32 lenght string in hex formate
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    
+    //? hashing the token
+    const encryptToken = crypto.createHash('sha256').update(resetToken).digest('hex')
+    
+    //? save it to the database so that the user can then compare it with the token the user provides
+    this.passwordResetToken = encryptToken;
+    //! we want it to only work for 10 mins so we convert it to miliseconds
+    this.passwordResetExpire = Date.now()+10*60*1000;
+    
+    //? finally we will return the reset token which will be send via email
+    //! so we send unencrypted one via email and store the encrypted one in the database to the encrpted one alone is useless
+    return resetToken;
+    
+    
+};
 
 
 

@@ -75,6 +75,27 @@ exports.login = catchAsync(async (req, res, next) => {
 
 });
 
+//! which will resive the email adderss
+exports.forgetPassword = catchAsync(async (req, res, next) => {
+    //^ 1)Get user based on POSTed email
+    const user = await User.findOne({email:req.body.email})
+    if(!user) return next(new AppError('There is no user with this password'),404);
+    
+    //^ 2)Generate the random reset token
+    const resetToken = user.createPasswordResetToken();
+    //! to save the changed date into the database as we cnanged it in the instance method but didnt save it, then disable validations
+    await user.save({validateBeforeSave:false})
+    
+    //^ 3)Send this token to the user email
+    
+
+});
+//! which will resive the token as well as the new password
+exports.resetPassword = catchAsync(async (req, res, next) => {
+
+
+});
+
 
 
 //! middleware function to protect certain routes from access incase the user is not logged in 
@@ -120,8 +141,8 @@ exports.restictTo = (...roles) =>{
         if(!roles.includes(req.user.role)) return next(new AppError('You have no permissions to perform this action',403))
         
         return next();
-    }    
+    };    
 
-}
+};
 
 
