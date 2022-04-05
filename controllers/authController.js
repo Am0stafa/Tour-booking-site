@@ -5,7 +5,7 @@ const User = require('../models/userModel')
 const catchAsync = require('../utils/catchAsync')
 const jwt = require('jsonwebtoken');
 const AppError = require('../utils/appError');
-
+const sendMail = require('../utils/email')
 
 
 exports.signup = catchAsync(async (req, res, next) => {
@@ -87,7 +87,31 @@ exports.forgetPassword = catchAsync(async (req, res, next) => {
     await user.save({validateBeforeSave:false})
     
     //^ 3)Send this token to the user email
+    //* the link the the user will resive.
+    //& to work on development and production
+    const resetURL = `${req.protocol}://${req.get('host')}/api/v1/users/restpassword/${resetToken}`
     
+    const message = `Forgot your password? Submit a PATCH request with your new password and passwordConfirm to: ${resetURL}.\nIf you didn't forget your password, please ignore this email!`;
+    
+    
+    //? we will make a try catch here as we want to do more than just send the user an error
+    try{
+       await sendMail({
+        email:req.body.email,
+        subject:'Your password reset token is only valid for 10 minuts!!!',
+        message
+       })
+    }catch(err){
+        //! incase of error we want to do two thing 1.reset the token 2.reset the expires property
+        user.passwordResetToken = undefined
+        user.passwordResetExpire = undefined
+        await user.save({validateBeforeSave:false})
+        return next(new AppError('there was an error sending email try again later'),500);   
+    }
+    res.status(200).json({
+        status:'success',
+        message:'Token send to email'
+    })
 
 });
 //! which will resive the token as well as the new password
