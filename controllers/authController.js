@@ -6,6 +6,7 @@ const catchAsync = require('../utils/catchAsync')
 const jwt = require('jsonwebtoken');
 const AppError = require('../utils/appError');
 const sendMail = require('../utils/email')
+const crypto = require('crypto');
 
 
 exports.signup = catchAsync(async (req, res, next) => {
@@ -116,9 +117,64 @@ exports.forgetPassword = catchAsync(async (req, res, next) => {
 });
 //! which will resive the token as well as the new password
 exports.resetPassword = catchAsync(async (req, res, next) => {
+    //^ 1) Get user based on the token AND check if the token didnt expire
+        //? we send the user through email the url containing the NON-encrpted token via the paramters
+        const hashedToken = crypto.createHash('sha256').update(req.params.token).digest('hex')
+        //? as this token is the only thing we know about the user
+        //? to check that the token didnt expire we will check if the passwordResetExpire property is GREATER THAN right now as this means that passwordResetExpire is in the future
+        const user = await User.findOne({passwordResetToken:hashedToken,passwordResetExpire:{$gt:Date.now()}});
+        if(!user) next(new AppError('Token is invalid or has expired'),400); 
+        
+    //^ 2) Set the new password and delete the passwordResetToken and passwordResetExpire
+        user.password = req.body.password;
+        user.passwordConfirm = req.body.passwordConfirm;
+        user.passwordResetToken = undefined;
+        user.passwordResetExpire = undefined;
+        await user.save();
 
+
+    //^ 3) Log the user in by sending the JWT to the client
+        const token =jwt.sign({id:user._id},process.env.JWT_SECRET,{
+            expiresIn:process.env.JWT_EXPIRE_IN,
+        })
+        
+        
+        res.status(200).json({
+            status: 'success',
+            token 
+        })
+
+    
+    
+});
+
+//! we need the user to be logged in and we need to ask for this password
+exports.updatePassword = catchAsync(async (req, res, next) => {
+    //^ 1)Get the user according to the id from the req
+        //& as this is a protected route and it passed to the protected route middleware we will have the user on the req
+        const user = await User.findById(req.user._id).select('+password')
+
+    //^ 2)Check if the password entered is correct
+        if(!(await user.correctPassword(user.password,req.body.passwordCurrent))) next(new AppError('Your current password is wrong!!'),401);
+
+    //^ 3)Update the password
+       user.password = req.body.password 
+       user.passwordConfirm = req.body.passwordConfirm
+       await user.save()
+       
+    //^ 4)Log the user in by sending a JWT
+        const token =jwt.sign({id:user._id},process.env.JWT_SECRET,{
+            expiresIn:process.env.JWT_EXPIRE_IN,
+        })
+        
+        
+        res.status(200).json({
+            status: 'success',
+            token 
+        })
 
 });
+
 
 
 

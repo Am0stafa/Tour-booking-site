@@ -10,6 +10,8 @@ router.post('/login',authController.login)
 router.post('/forgotpassword',authController.forgetPassword)
 //? as the result of this will be the modification of the password property
 router.patch('/restpassword/:token',authController.resetPassword)
+router.patch('/updatepassword',authController.protect,authController.updatePassword)
+router.patch('/updateme',authController.protect,userController.updateMe)
 
 
 router

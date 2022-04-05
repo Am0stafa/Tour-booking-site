@@ -73,9 +73,20 @@ userSchema.pre('save',async function(next){
     next();
 });
 //!Summary three things is done up:
-//1)run only when created or modified
-//2)hash the password in an async way
-//3)delete the confirm password
+//^ 1)run only when created or modified
+//^ 2)hash the password in an async way
+//^ 3)delete the confirm password
+
+
+//! Middleware function to set the passwordChangedAt property of the user for the protected route ONlY when the password change not when its newly created
+userSchema.pre('save', function(next){
+    if(!this.isModified('password') || this.isNew) return next();
+
+    this.passwordChangedAt = Date.now()-1000;
+    next();
+});
+
+
 
 //----------------------------------------------------------------------------
 
@@ -87,13 +98,14 @@ userSchema.methods.correctPassword = async function(passEntered, userPassword) {
     //it will return true or false
     //* compare function hash the password and compare them
     return await bcrypt.compare(passEntered, userPassword);
-
+//! when calling this function we must await it as it is an async function
 }
+
 //!Now just call it in the login
 
 
-//! another instance method to check if the password is changed
 
+//! another instance method to check if the password is changed
 
 userSchema.methods.checkChangePassword = function(JWTtime) {
     //? we will compare the time it is created and the time the password changed but only if passwordchange field exist as it will only be added only if we changed the password.
@@ -103,7 +115,7 @@ userSchema.methods.checkChangePassword = function(JWTtime) {
         const newTime = parseInt(
             this.passwordChangedAt.getTime() / 1000,
             10
-          );
+        );
         return JWTtime<newTime
     }
     
