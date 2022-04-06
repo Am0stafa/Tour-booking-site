@@ -62,6 +62,24 @@ exports.updateMe = catchAsync(async (req, res, next) => {
 })
 
 
+//! To delete a user what we will do is set the active property to false deactivate his account and he can reactive his account at any time
+exports.deleteMe = catchAsync(async (req, res, next) => {
+  await User.findByIdAndUpdate(req.user.id,{active:false})
+  
+  res.status(200).json({
+    status: 'success',
+    data: null
+  });
+
+})
+
+
+
+
+
+
+
+
 //! it is for the adminstartor to update all of the users data
 exports.updateUser = (req, res) => {
   res.status(500).json({

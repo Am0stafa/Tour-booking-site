@@ -47,7 +47,12 @@ const userSchema = new mongoose.Schema({
     passwordChangedAt: Date,
     passwordResetToken:String,
     //! so that the user only have limited time to reset the password
-    passwordResetExpire:Date
+    passwordResetExpire:Date,
+    active:{
+        type:Boolean,
+        default:true,
+        select:false
+    }
 
 })
 
@@ -86,6 +91,16 @@ userSchema.pre('save', function(next){
     next();
 });
 
+
+//! Query middleware which is something that will happen before a query to hide any inactive user as if he doesnt exist
+//? any query that start with find
+userSchema.pre(/^find/,function(next){
+    //^ this point to the current query is executed
+    //& we only want to find the documents which have the active property set to true so we will take our query and return only where active is not false and there are some documents who dont have active property
+    this.find({active:{$ne:false}})
+    next();
+
+});
 
 
 //----------------------------------------------------------------------------
