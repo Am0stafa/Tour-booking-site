@@ -30,7 +30,7 @@ const userSchema = new mongoose.Schema({
         type:String ,
         required: [true, "A user must have password"],
         minlength: 8,
-        select:false
+        select:false //! still doesnt hide from creation
     },
     passwordConfirm:{
         type:String,

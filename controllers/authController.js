@@ -8,6 +8,15 @@ const AppError = require('../utils/appError');
 const sendMail = require('../utils/email')
 const crypto = require('crypto');
 
+let cookieOptions={
+    expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRE_IN*24*60*60*1000),
+  //  secure:true, //! will only be send when we are using encrypted connection HTTPS, ONLY IN PRODUCTION
+    httpOnly:true, //! the cookie cannot be accessed or modified in any way by the browser.Preveny XSS
+}
+if (process.env.NODE_ENV === 'production') {
+    cookieOptions.secure = true;
+}
+
 
 exports.signup = catchAsync(async (req, res, next) => {
         //! insecure  
@@ -22,12 +31,19 @@ exports.signup = catchAsync(async (req, res, next) => {
                                        role:req.body.role});
     //*automatically sign in
                                       
-    //creating the token by making the payload the id of the user and the securet to be a secret string from the .env, and object of options such as expire time to logout the user after cirtain time as this token wont be valid after time pass also from .env
+    //^ creating the token by making the payload the id of the user and the securet to be a secret string from the .env, and object of options such as expire time to logout the user after cirtain time as this token wont be valid after time pass also from .env
     const token = jwt.sign({id:newUser._id},process.env.JWT_SECRET,{
         expiresIn:process.env.JWT_EXPIRE_IN,
     })
-    //now send it to the client
-    //and now the client must save this token
+    //^ now send it to the client
+    //^ and now the client must save this token
+    
+    //^ put the jwt in cookie where we attach it to the res.cookie object
+    
+    res.cookie('jwt',token,cookieOptions)
+    
+    //! to remove the password from output
+    newUser.password =undefined; //! and dont save
     
     res.status(201).json({
         status: 'success',
@@ -51,7 +67,7 @@ exports.login = catchAsync(async (req, res, next) => {
        //create a new custom error
        return next(new AppError('please provide email and password',400));
     }
-    //^ 2)check if the user email and the password is correct: we make it as one so that the attacker wont know which is incorrect
+    //^ 2)check if the user email and the password is correct
     //find el column el esmo email bel email da and as the password is made not selected so we select it
     const user = await User.findOne({email:email}).select('+password')
     
@@ -68,6 +84,7 @@ exports.login = catchAsync(async (req, res, next) => {
         expiresIn:process.env.JWT_EXPIRE_IN,
     })
     
+    res.cookie('jwt',token,cookieOptions)
     
     res.status(200).json({
         status: 'success',
@@ -138,6 +155,7 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
             expiresIn:process.env.JWT_EXPIRE_IN,
         })
         
+        res.cookie('jwt',token,cookieOptions)
         
         res.status(200).json({
             status: 'success',
@@ -167,6 +185,7 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
             expiresIn:process.env.JWT_EXPIRE_IN,
         })
         
+        res.cookie('jwt',token,cookieOptions)
         
         res.status(200).json({
             status: 'success',
@@ -209,7 +228,7 @@ exports.protect = catchAsync(async (req, res, next) => {
    //! put the user in the request so that we can use it in the next middleware function as we cant get the user by searching by his id which we get from the params
     req.user = currUser;
     next();
-})
+} )
 
 //! another middleware function for authorization to restrict certain routes only to certain user roles
 
