@@ -1,21 +1,57 @@
 const express = require('express');
 const morgan = require('morgan');
-
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController');
 const app = express();
+const rateLimit = require('express-rate-limit')
+const helmet = require("helmet");
+const mongoSanitize = require('express-mongo-sanitize');
+const xss = require('xss-clean')
 
-// 1) MIDDLEWARES
+
+
+
+//! 1) GLobal MIDDLEWARES
+
+//^ Development logging
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
-app.use(express.json());//json parser
+//^ Set secure HTTP header
+app.use(helmet())
+
+//^ Simit requests from same ip
+//& rateLimit is a function which takes as input object of options
+const limiter = rateLimit({
+	windowMs: 60 * 60 * 1000, // 15 minutes
+	max: 110, // Limit each IP to 100 requests per `window` (here, per 15 minutes)
+	standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+	legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+	message:'Too many request please try again later!!'
+})
+//? Apply the rate limiting middleware to API calls only
+app.use('/api',limiter)
+
+
+//^ Body paser, for reading data from the body into req.body
+app.use(express.json());
+
+//^ Data santitization aginst NoSql query injection
+//& it looks at the request body, the request query string and also the request params THEN it will basically filter out all of the doller sign and dots as this is how mongodb operator are writtern
+app.use(mongoSanitize())
+
+//^ Data santitization aginst against XXS
+//& this will then clean ant user input from malicious HTML code
+app.use(xss())
+
+
+//^ Serving static files
 app.use(express.static(`${__dirname}/public`));
 
-//* basic middelware
+//^ Test middelware
 // app.use((req, res, next) => {
 //   console.log('Hello from the middleware 👋');
 //   next();
@@ -29,14 +65,14 @@ app.use((req, res, next) => {
 
 
 
-// 3) ROUTES
+//! 2) ROUTES
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 
 //^ what we want to implement is a route handler for a route that was not cached by any of  our route handlers
 //* since the code is executed are executed in order so if we have a request that makes it into this point here of our code this means that non of the above where able to catch it.
 
-//app.all it will run for all the http methods get patch post delete etc. * in the url stand for every thing
+//? app.all it will run for all the http methods get patch post delete etc. * in the url stand for every thing
 app.all('*', (req, res,next) => {
   // res.status(404).json({
   //   status: 'failed',
