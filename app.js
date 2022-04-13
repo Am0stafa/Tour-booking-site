@@ -8,8 +8,8 @@ const app = express();
 const rateLimit = require('express-rate-limit')
 const helmet = require("helmet");
 const mongoSanitize = require('express-mongo-sanitize');
-const xss = require('xss-clean')
-
+var xss = require('xss-clean')
+const hpp = require('hpp')
 
 
 
@@ -47,6 +47,19 @@ app.use(mongoSanitize())
 //& this will then clean ant user input from malicious HTML code
 app.use(xss())
 
+//^ Pervent parametere pollution
+app.use(
+  hpp({
+    whitelist: [
+      'duration',
+      'ratingsQuantity',
+      'ratingsAverage',
+      'maxGroupSize',
+      'difficulty',
+      'price'
+    ]
+  })
+);
 
 //^ Serving static files
 app.use(express.static(`${__dirname}/public`));
