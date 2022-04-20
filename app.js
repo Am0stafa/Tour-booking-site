@@ -10,7 +10,7 @@ const helmet = require("helmet");
 const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean')
 const hpp = require('hpp')
-
+const reviewRoute = require('./routes/reviewRoutes')
 
 
 //! 1) GLobal MIDDLEWARES
@@ -78,8 +78,10 @@ app.use((req, res, next) => {
 
 
 //! 2) ROUTES
+//^ middleware that will be called whenever we make a call to this route
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
+app.use('/api/v1/reviews', reviewRoute);
 
 //^ what we want to implement is a route handler for a route that was not cached by any of  our route handlers
 //* since the code is executed are executed in order so if we have a request that makes it into this point here of our code this means that non of the above where able to catch it.

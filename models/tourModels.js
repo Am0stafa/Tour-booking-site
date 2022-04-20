@@ -138,6 +138,7 @@ const toursSchema = new mongoose.Schema(
         day: Number
       }
     ],
+    //!refrence model
     guides:[
       {
       //! it will just contain the ids of the tour guid
