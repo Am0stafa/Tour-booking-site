@@ -25,7 +25,7 @@ mongoose.connect(DB , {
 //start by reading the JSON file
 //as this will return JSON and we need it as an array for insertion
 const tours = JSON.parse(
-  fs.readFileSync(`${__dirname}/tours-simple.json`, 'utf-8')
+  fs.readFileSync(`${__dirname}/tours.json`, 'utf-8')
 );
 
 //the function which will import the data into the database
@@ -76,4 +76,5 @@ else if(process.argv[2]==='--delete'){
 }
 else{
     console.log("insert a valid data either --insert OR --delete")
+    process.exit();
 }

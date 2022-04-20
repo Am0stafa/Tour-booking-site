@@ -38,7 +38,8 @@ const toursSchema = new mongoose.Schema(
   },
   difficulty:{
     type:String,
-    //we only want the deificulty to be between only three values to we will make an enum just like in java
+    //! we only want the dificulty to be between only three values to we will make an enum just like in java
+    //! an array which all the possible values 
     enum:{
       values: ['easy', 'medium', 'difficult'],
       message:'dificulty is either :easy, medium, difficult'
@@ -61,7 +62,7 @@ const toursSchema = new mongoose.Schema(
   },
   priceDiscount:{
     type:Number,
-    //^a validator is just a function which return either true or false and in case it returns false then it means that there is an error and if true that means that the validation is correct and the input can be accepted, no arrow function to use this keyword
+    //^ a validator is just a function which return either true or false and in case it returns false then it means that there is an error and if true that means that the validation is correct and the input can be accepted, no arrow function to use this keyword
     //*if the price discount is lower than the price itself
   validate:{
   
@@ -106,10 +107,49 @@ const toursSchema = new mongoose.Schema(
     type:Boolean, 
     default:false,
   },
+    startLocation:{
+      //^ mongodb support geospecial data the latitude and longitude and mongodb used special data called GeoJSON
+      type:{
+        type:String,
+        default:'Point',
+        //! an array which all the possible values
+        //! el gowa el enum bas el y2dar y5osh gowaha
+        enum:['Point']
+      },
+      //* an array of numbers
+      coordinates:[Number],
+      address:{
+        type: String
+      },
+      description: String
+    
+    },
+    //! it is an embedded object so it must be an array of objects
+     locations: [
+      {
+        type: {
+          type: String,
+          default: 'Point',
+          enum: ['Point']
+        },
+        coordinates: [Number],
+        address: String,
+        description: String,
+        day: Number
+      }
+    ],
+    guides:[
+      {
+      //! it will just contain the ids of the tour guid
+        type:mongoose.Schema.ObjectId,
+        ref:'User'
+      }
+    ]
+  
   
 },
 {
-//this here sayes that each time the data is actually outputted as JSON or Object we want virtuals to be part of thr output 
+//! this here sayes that each time the data is actually outputted as JSON or Object we want virtuals to be part of thr output 
     toJSON:{virtuals:true},
     toObject:{virtuals:true},
 });
@@ -136,17 +176,23 @@ toursSchema.virtual('durationWeek').get(function(){
 //^ this will run before an event and the event is then specified inside('')
 
 toursSchema.pre('save',function(next){
-
-//this will run before document is saved to the database so it will be triggered when .save() and .create() but not on insert
-//^ this keyword will return us the data that is going to the database allowing us to act on the data before it id then saved
-//? we will create a slug for each of the documents
-    //this contains our document and the slugify taked the string that we want to create a slug out of
-      this.slug = slugify(this.name, {lower:true});
-  //next to call the next middleware in the stack
-  next();
+  
+  //^ this will run before document is saved to the database so it will be triggered when .save() and .create() but not on insert
+  //^ this keyword will return us the data that is going to the database allowing us to act on the data before it id then saved
+  //? we will create a slug for each of the documents
+      //^ this contains our document and the slugify taked the string that we want to create a slug out of
+        this.slug = slugify(this.name, {lower:true});
+    //* next to call the next middleware in the stack
+    next();
 })
 
-
+//! for embedding the user by iterating over the array an getting all the users and the array only contain the ids
+// tourSchema.pre('save', async function(next) {
+//   const guidesPromises = this.guides.map(async id => await User.findById(id));
+// //* as we will have an array of promises so we must resolve them  
+//   this.guides = await Promise.all(guidesPromises);
+//   next();
+// });
 
 
 //! 2)Query middleware
@@ -156,24 +202,30 @@ toursSchema.pre('save',function(next){
 //^ a problem that we will face is that this will only work with find not ex findOne find... so to solve this problem we used regular expretion to make it work with any thing containg find
 
 toursSchema.pre(/^find/,function(next){
-//the diffrence so fare is that the this keyword is now pointing to a query no a document
-
-//this will manipulate the queryString removing all the secret tours 
+  //the diffrence so fare is that the this keyword is now pointing to a query no a document
+  
+  //this will manipulate the queryString removing all the secret tours 
   this.find({ secretTour:{ $ne:true } });
-this.start = Date.now();
+  this.start = Date.now();
+  
+  next();
+})
 
-next();
+toursSchema.pre(/^find/,function(next){
+  this.populate({path:'guides',select:'-__v -passwordChangedAt'});
+  //! Rather than having the populate on every query like this we make a query middleware
+
 })
 
 
 //* here we are making a clock that calculate how long it will take to execute the query
 
 toursSchema.post(/^find/,function(docs,next){
-//here the this keyword will return us all the documents that will return from the query as the query has been finished.
+  //^ here the this keyword will return us all the documents that will return from the query as the query has been finished.
   //! in post we cant use this insted it will pass us the document that had been saved (docs)
-console.log(`Query took ${Date.now() - docs.start} milisec`);
-
-next();
+  console.log(`Query took ${Date.now() - docs.start} milisec`);
+  
+  next();
 });
 
 

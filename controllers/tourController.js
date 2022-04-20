@@ -51,10 +51,13 @@ exports.getAllTours = async (req, res) => {
 exports.getTour =async (req, res,next) => {
  
   try{
-    //here it will take req.params.the name of the route in the route file and findById only expect to take the id we are  looking for
-    const tour = await Tour.findById(req.params.id);
-    //findById works the same way as 
-    //Tour.find({ _id:req.params.id })
+    //^ here it will take req.params.the name of the route in the route file and findById only expect to take the id we are  looking for
+    
+    //! Rather than having the populate on every query like this we make a query middleware
+    //const tour = await Tour.findById(req.params.id).populate({path:'guides',select:'-__v -passwordChangedAt'});
+    
+    //& findById works the same way as 
+    //& Tour.find({ _id:req.params.id })
     
     //^ to handel the error mentioned below
     if(!tour) throw new AppError("invaild id", 404)

@@ -8,7 +8,7 @@ const app = express();
 const rateLimit = require('express-rate-limit')
 const helmet = require("helmet");
 const mongoSanitize = require('express-mongo-sanitize');
-var xss = require('xss-clean')
+const xss = require('xss-clean')
 const hpp = require('hpp')
 
 
@@ -60,7 +60,7 @@ app.use(
     ]
   })
 );
-
+k
 //^ Serving static files
 app.use(express.static(`${__dirname}/public`));
 
@@ -74,7 +74,6 @@ app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
   next();
 });
-
 
 
 
