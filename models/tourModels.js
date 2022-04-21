@@ -166,7 +166,13 @@ toursSchema.virtual('durationWeek').get(function(){
   return this.duration /7;
 })
 
-
+//! to get access to all the reviews of certain tour without child refrencing
+//! the query that you want it to be on populate it first
+toursSchema.virtual('reviews',{
+  ref:'Review',
+  foreignField:'tour',//^ mesameyeno eh henak "forgein key"
+  localField:'_id'//^ mesamyeno eh hena "primary key"
+})
 
 //* mongoose middlewares: just like express we can use mongoose middlewares to make something happen between two events for example each time a new document is saved to database we can run a function between the save command and the acctual saving of the document thats also why mongooes middlewares are some times called pre and post hooks as we can run a function before or after an event. middlewares are defined on the schema
 //? there are four types of middlewares in mongoose: document query aggregate and model.
@@ -215,7 +221,7 @@ toursSchema.pre(/^find/,function(next){
 toursSchema.pre(/^find/,function(next){
   this.populate({path:'guides',select:'-__v -passwordChangedAt'});
   //! Rather than having the populate on every query like this we make a query middleware
-
+  next()
 })
 
 

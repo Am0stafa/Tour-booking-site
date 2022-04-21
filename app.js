@@ -60,7 +60,7 @@ app.use(
     ]
   })
 );
-k
+
 //^ Serving static files
 app.use(express.static(`${__dirname}/public`));
 

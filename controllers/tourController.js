@@ -53,8 +53,10 @@ exports.getTour =async (req, res,next) => {
   try{
     //^ here it will take req.params.the name of the route in the route file and findById only expect to take the id we are  looking for
     
-    //! Rather than having the populate on every query like this we make a query middleware
-    //const tour = await Tour.findById(req.params.id).populate({path:'guides',select:'-__v -passwordChangedAt'});
+    //! Rather than having the populate on every query like this we make a query middleware:
+    //.populate({path:'guides',select:'-__v -passwordChangedAt'})
+    //? and put here only the populate that you want it to appear only on this query: here we want it to appear only when selecting one
+    const tour = await Tour.findById(req.params.id).populate('reviews');
     
     //& findById works the same way as 
     //& Tour.find({ _id:req.params.id })
@@ -83,9 +85,7 @@ exports.getTour =async (req, res,next) => {
 
 };
 
-const catchAsync = (func) => {
 
-}
 
 exports.createTour = async (req, res,next) => {
   // console.log(req.body);

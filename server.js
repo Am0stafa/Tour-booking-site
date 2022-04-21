@@ -22,6 +22,10 @@ mongoose.connect(DB , {
   console.log("DB is connection successful");
 }).catch(err=>{
   console.log(err)
+  server.close(()=>{
+    //here it takes a code 0 for successful 1 for failed
+  process.exit(1)
+  })
 });
 
 
