@@ -18,7 +18,6 @@ router.delete('/deleteme',authController.protect,userController.deleteMe)
 router
   .route('/')
   .get(userController.getAllUsers)
-  .post(userController.createUser);
 
 router
   .route('/:id')

@@ -2,6 +2,7 @@
 const User = require('../models/userModel')
 const catchAsync = require('../utils/catchAsync')
 const AppError = require('../utils/appError');
+const factory = require('./handlerFactory')
 
 
 const filterObj = (obj,...allowed)=>{
@@ -14,33 +15,14 @@ const filterObj = (obj,...allowed)=>{
 }
 
 
-exports.getAllUsers = catchAsync(async (req, res, next) => {
-  const users = await User.find();
+exports.getAllUsers = factory.getAll(User)
 
-  // SEND RESPONSE
-  res.status(200).json({
-    status: 'success',
-    results: users.length,
-    data: {
-      users
-    }
-  });
-});
-exports.getUser = (req, res) => {
-  res.status(500).json({
-    status: 'error',
-    message: 'This route is not yet defined!'
-  });
-};
-exports.createUser = (req, res) => {
-  res.status(500).json({
-    status: 'error',
-    message: 'This route is not yet defined!'
-  });
-};
+exports.getUser = factory.getOne(User)
+
 
 //! to update the currently authenticated user
 exports.updateMe = catchAsync(async (req, res, next) => {
+
   //? can only update the name and the email address
   //! as this is a protected route we will get the id from user.id as we putted the user on the request
   
@@ -76,20 +58,7 @@ exports.deleteMe = catchAsync(async (req, res, next) => {
 
 
 
+//! it is for the adminstartor to update all of the users data or permenatntly delete a user
+exports.updateUser = factory.updateOne(User)
 
-
-
-
-//! it is for the adminstartor to update all of the users data
-exports.updateUser = (req, res) => {
-  res.status(500).json({
-    status: 'error',
-    message: 'This route is not yet defined!'
-  });
-};
-exports.deleteUser = (req, res) => {
-  res.status(500).json({
-    status: 'error',
-    message: 'This route is not yet defined!'
-  });
-};
+exports.deleteUser = factory.deleteOne(User)

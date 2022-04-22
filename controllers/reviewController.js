@@ -1,9 +1,26 @@
 const Review = require('./../models/reviewModel')
 const catchAsync = require('../utils/catchAsync')
+const factory = require('./handlerFactory')
+const APIFeatchers = require('../utils/apiFeatures')
+
+
 
 exports.getAllReviews = catchAsync(async (req, res, next) => {
-    const review = await Review.find();
+    let filter ={}
+    //! if there is an id passed we are only going to search for reviews where the tour is equal to the tour id
     
+    if (req.params.tourId) filter = {tour: req.params.tourId}
+    
+    //* we will first create an instance of the APIfeachers which contain the functions needed and we have accesee to nesting as we returned this in every method
+    
+    const featers = new APIFeatchers( Review.find(filter),req.query)
+       .filter()
+       .sort()
+       .limit()
+       .paginate()
+       
+    //^ to get access to the query we build inside the class
+    const review = await featers.query;
     res.status(200).json({
         status:'sucess',
         result: review.length,    
@@ -23,6 +40,8 @@ exports.createReview = catchAsync(async (req, res, next) => {
     
     if(!req.body.user) req.body.user = req.user.id;
     
+    //^ the above could be implemented using middleware
+    
     const newRewview = await Review.create(req.body);
 
     res.status(201).json({
@@ -33,3 +52,10 @@ exports.createReview = catchAsync(async (req, res, next) => {
     })
 
 })
+
+
+//! rater than writing alot of repeted code we will user factory function which taked the model and return a function which will be invoked when the route in accessed
+
+exports.deleteReview = factory.deleteOne(Review)
+exports.updateReview = factory.updateOne(Review)
+exports.getReview = factory.getOne(Review)

@@ -19,14 +19,14 @@ exports.getAllTours = async (req, res) => {
   try{
 
 //?2)Execute the query
-//we will first create an instance of the APIfeachers which contain the functions needed and we have accesee to nesting as we returned this in every method
+//* we will first create an instance of the APIfeachers which contain the functions needed and we have accesee to nesting as we returned this in every method
   const featers = new APIFeatchers(Tour.find(),req.query)
        .filter()
        .sort()
        .limit()
        .paginate()
        
-  //to get access to the query we build inside the class
+  //^ to get access to the query we build inside the class
   const tours = await featers.query;
   //and finally will return our tours
 
