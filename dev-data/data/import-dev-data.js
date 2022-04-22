@@ -1,8 +1,12 @@
 //this is a scrip file that will run independent from the application
+//! to use 1)import the model 2)write location to read 3)write in the import/delete function the name of the model and file
+
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const fs = require('fs');
 const Tour = require('./../../models/tourModels')
+const Review = require('./../../models/reviewModel')
+const User = require('./../../models/userModel')
 
 dotenv.config({ path: './config.env' });
 
@@ -22,50 +26,57 @@ mongoose.connect(DB , {
 });
 
 
-//start by reading the JSON file
-//as this will return JSON and we need it as an array for insertion
+//* start by reading the JSON file
+//* as this will return JSON and we need it as an array for insertion
 const tours = JSON.parse(
   fs.readFileSync(`${__dirname}/tours.json`, 'utf-8')
 );
+const users = JSON.parse(
+  fs.readFileSync(`${__dirname}/users.json`, 'utf-8')
+);
+const reviews = JSON.parse(
+  fs.readFileSync(`${__dirname}/reviews.json`, 'utf-8')
+);
 
-//the function which will import the data into the database
+//! the function which will import the data into the database
 const importData = async () => {
 
     try{
-    //the create function not only take object but also accepts an array of objects and in that case it will create a new document for each of the array
+    //? the create function not only take object but also accepts an array of objects and in that case it will create a new document for each of the array
       await Tour.create(tours)  
+      await User.create(users,{validateBeforeSave:false})  
+      await Review.create(reviews)  
         console.log("data successful loaded!")
     }catch(err){
         console.log(err);
     }finally{
-        //this here is an aggressive way of termenating a process
+        //? this here is an aggressive way of termenating a process
         process.exit();
     }
 
 }
 
-//A script tha delete all data from a collection
+//! A script tha delete all data from a collection
 
 const deleteData = async () => {
 
     try{
     
         await Tour.deleteMany();
+        await User.deleteMany();
+        await Review.deleteMany();
         console.log("data deleted successfully")
     }catch(err){
         console.log(err);
     }finally{
-        //this here is an aggressive way of termenating a process
+        //? this here is an aggressive way of termenating a process
         process.exit();
     }
 
 
 }
-//this file alone wont do any thing so to execute we will do that in the terminal
 
-//to be able us make use of this terminal application we have a function called process.argv that return an array and this array contain data such as the location of the file name that we specified when running this application on the terminal as so we can add another arrgument beside the file name like we did when for example installing a dev dependence we did --div-dependence and so if we add another element to the end of the line node (file name) --(arrgument) we can have access to it form the console.log(process.argv) as it will be put in the array.
-
-//so it will add the data if we specify --insert and delete if we specify --delete
+//^ so it will add the data if we specify --insert and delete if we specify --delete
 
 if(process.argv[2]==='--insert'){
     importData();

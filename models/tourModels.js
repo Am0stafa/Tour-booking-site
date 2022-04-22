@@ -155,6 +155,9 @@ const toursSchema = new mongoose.Schema(
     toObject:{virtuals:true},
 });
 
+//! setting indexing for fast search
+toursSchema.index({price:1,ratingsAverage:1})
+
 //? virtual properties are basically fields that we can define on our schema but it will not be presisted so they will not be saved into the database in order to save us some space this make sence for fields that can be derived from one another like convertions from mile to km. AND we need to explicitly define in our schema that we want the virtual properties.the downside of virtual is that we wont be able to us this virtual object in a query.
 
 //? this virtual propertie contains the tour duration in weeks which can be converted from the duration that we already have in days

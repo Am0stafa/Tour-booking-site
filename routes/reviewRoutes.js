@@ -9,6 +9,10 @@ const router = express.Router({mergeParams:true});
 //! GET /tour/q89645129834:tourId/review
 //! GET /tour/q89645129834:tourId/review/245254:reviewId //single tour single review
 //! ALSO /review
+
+//& no one can access any of this routes without  being authenicated
+router.use(authController.protect)
+
 router
   .route('/')
   .get(reviewController.getAllReviews)
@@ -18,7 +22,8 @@ router
 router
   .route('/:id')
   .get(reviewController.getReview)
-  .delete(reviewController.deleteReview)
-  .patch(reviewController.updateReview)
+  .delete(authController.restictTo('user','admin'),reviewController.deleteReview)
+  .patch(authController.restictTo('user','admin'),reviewController.updateReview)
 
 module.exports = router;
+

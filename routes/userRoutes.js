@@ -8,8 +8,14 @@ const router = express.Router();
 router.post('/signup',authController.signup)
 router.post('/login',authController.login)
 router.post('/forgotpassword',authController.forgetPassword)
-//? as the result of this will be the modification of the password property
+//? PATCH as the result of this will be the modification of the password property
 router.patch('/restpassword/:token',authController.resetPassword)
+
+
+//! a trick we can use here rather than putting in all routes under this line the protect middleware is doing:
+// router.use(authController.protect)
+//! as middlewares are passed by sequance after this line all routes will run this middlware first
+
 router.patch('/updatepassword',authController.protect,authController.updatePassword)
 router.patch('/updateme',authController.protect,userController.updateMe)
 router.delete('/deleteme',authController.protect,userController.deleteMe)
@@ -18,13 +24,17 @@ router.get('/me',authController.protect,userController.getMe,userController.getU
 
 router
   .route('/')
-  .get(userController.getAllUsers)
+  .get(authController.protect,userController.getAllUsers)
+
+
+//! restrict all routes after this middleware to admins
+router.use(authController.restictTo('admin'))
 
 router
   .route('/:id')
-  .get(userController.getUser)
-  .patch(userController.updateUser)
-  .delete(userController.deleteUser);
+  .get(authController.protect,userController.getUser)
+  .patch(authController.protect,userController.updateUser)
+  .delete(authController.protect,userController.deleteUser);
 
 
 

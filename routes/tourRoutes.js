@@ -18,7 +18,7 @@ router
 
 router
     .route('/monthly-plan/:year')
-    .get(tourController.getMonthlyplan)
+    .get(authController.protect,authController.restictTo('admin', 'lead-guide','guide'),tourController.getMonthlyplan)
 
 router
   .route('/top-5-cheap')
@@ -28,14 +28,13 @@ router
 
 router
   .route('/')
-  //^ it will run this middleware first to check if the user is permeted to access this route
-  .get(authController.protect,tourController.getAllTours)
-  .post(tourController.createTour)
+  .get(tourController.getAllTours)
+  .post(authController.protect,authController.restictTo('admin', 'lead-guide'),tourController.createTour)
 
 router
   .route('/:id')
   .get(tourController.getTour)
-  .patch(tourController.updateTour)
+  .patch(authController.protect,authController.restictTo('admin', 'lead-guide'),tourController.updateTour)
   .delete(authController.protect,authController.restictTo('admin', 'lead-guide'),tourController.deleteTour)
   
   
