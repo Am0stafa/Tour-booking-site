@@ -15,14 +15,8 @@ const filterObj = (obj,...allowed)=>{
 }
 
 
-exports.getAllUsers = factory.getAll(User)
-
-exports.getUser = factory.getOne(User)
-
-
 //! to update the currently authenticated user
 exports.updateMe = catchAsync(async (req, res, next) => {
-
   //? can only update the name and the email address
   //! as this is a protected route we will get the id from user.id as we putted the user on the request
   
@@ -44,6 +38,17 @@ exports.updateMe = catchAsync(async (req, res, next) => {
 })
 
 
+//! get my user information from currently logged in user in the request by making an middleware to put the userId on params from the req
+//^ now run this middleware after cheching for authentication to get personal information
+exports.getMe = (req ,res, next)=>{
+req.params.id = req.user.id
+next()
+}
+
+
+
+
+
 //! To delete a user what we will do is set the active property to false deactivate his account and he can reactive his account at any time
 exports.deleteMe = catchAsync(async (req, res, next) => {
   await User.findByIdAndUpdate(req.user.id,{active:false})
@@ -60,5 +65,7 @@ exports.deleteMe = catchAsync(async (req, res, next) => {
 
 //! it is for the adminstartor to update all of the users data or permenatntly delete a user
 exports.updateUser = factory.updateOne(User)
-
 exports.deleteUser = factory.deleteOne(User)
+exports.getAllUsers = factory.getAll(User)
+//* this here gets a user by his id only by the admin if you want personal info use the above middleware
+exports.getUser = factory.getOne(User)
