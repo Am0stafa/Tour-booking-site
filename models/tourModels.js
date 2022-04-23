@@ -13,10 +13,10 @@ const toursSchema = new mongoose.Schema(
 {
   name:{
     type:String,
-    //required or not and the error string
+    //! required or not and the error string
     required:[ true, "A tour must have a name" ], 
     unique:true,
-    //trim ensure that the data entered is formated nicely eg "  abdo" will be formated into "abdo"
+    //^ trim ensure that the data entered is formated nicely eg "  abdo" will be formated into "abdo"
     trim:true,
     maxlength:[255, "Tour name must not have more than 255 characters"],
     minlength:[5, "Tour name must have more than 5 characters"],
@@ -45,7 +45,7 @@ const toursSchema = new mongoose.Schema(
       message:'dificulty is either :easy, medium, difficult'
     }
   },
-    //thoes ratings are going to be calculated from the real reviews
+  //& they will be calculated from another dataset
   ratingAverage:{
     type:Number,
     default:4.5,

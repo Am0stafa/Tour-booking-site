@@ -180,7 +180,6 @@ try{
 //!using aggrigation pipeline I made a function which calculate a couple of statistics about our tours
 
 
-
 //& important disclaimer the $ is used beside the operators and along with operator followed a document only'$doc_name'
 
 
@@ -203,8 +202,7 @@ exports.getTourStats = async (req, res) => {
       //^what we will do here is caluclate the average rating ,average price, minPrice ,maxPrice...
       //?the first thing we need to specify is the id as this is where we are going to specify what we want to group by
       
-      _id:'null', //! null as we want to have every thing in one group so that we can calculate the statistics for all of the tours togethers and not separated by groups, If you want for a specific field use the name of it in '$name'
-      
+      _id:{$toUpper:'$difficulty'}, 
       //calculating the average
       //^ the avg,min is an mathicamtical opertaor which we pass to it the field name between ''
       avgRating:{$avg:'$ratingAverage'},
@@ -265,7 +263,7 @@ exports.getMonthlyplan = async (req, res) => {
    {
    //? select the doucments for the year that was passed in
    $match:{
-   //we want it to be between 2021 so it must be between jan 1 and dec 31
+   //* we want it to be between 2021 so it must be between jan 1 and dec 31
     startDates:{
     //! AND is denoted by ,
         $gte: new Date(`${year}-01-01`),
