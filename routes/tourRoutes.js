@@ -26,6 +26,12 @@ router
   //! inside this our query string must look like this ?limt=5&sort=-rateingAverage,price
   //! this middelware is prefilling the query string for the user so that the user doesn't have to do it on this own
 
+//^ tour-within/distance=233&center=-40,45&unit=mi rather than making it as a query it will look like this
+//^ tour-within/233/center/-40,45/uniy/mi
+router
+  .route('/tour-within/:distance/center/:latlng/unit/:unit')
+  .get(tourController.getToursWithin)
+
 router
   .route('/')
   .get(tourController.getAllTours)

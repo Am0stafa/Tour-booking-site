@@ -330,3 +330,32 @@ exports.getMonthlyplan = async (req, res) => {
   }
 
 }
+
+//! this feature so for if you want to know which tours is far from you according to circle with specified distance and unit
+exports.getToursWithin =catchAsync(async (req, res, next) => {
+    //& first we need to get our paramerters
+    const {distance,latlng,unit} = req.params;
+    //& then we exepet the latlng to contain cordinated
+    const [lat,lng] = latlng.split(",");
+    
+    //& as it expect the radius in radiant which = distance/radius of the earth in miles or km
+    radiant = unit === 'mi'? distance/3963.2 : distance/6378.1;
+    
+    if(!lat||!lng){
+       next(new AppError('Please enter your correct coordinates'),400);   
+    }
+  
+    //! we need to find tours inside a circle that starts at this point that we defined (latlang) and which have a radius of the distance that we defined (distance)BUT in need to be in radiant. so we need to pass this information to this mongooes geoSpatial option
+    const tours = await Tour.find({
+      startLocation: { $geoWithin: { $centerSphere: [[lng, lat], radiant] } }
+    });  
+    res.status(200).json({
+      status: 'success',
+      results: tours.length,
+      data: {
+        data:tours
+      }
+    });
+    
+  //! we finally need to index the attributes which has the geoSpatial data is stored into 2dsphere
+})

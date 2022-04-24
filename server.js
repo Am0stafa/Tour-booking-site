@@ -14,8 +14,8 @@ const DB = process.env.DATABASE.replace("<PASSWORD>", process.env.DATABASE_PASSW
 mongoose.connect(DB , {
   useNewUrlParser:true,
   useCreateIndex:true, 
-  useFindAndModify:true
-  
+  useFindAndModify:true, 
+  useUnifiedTopology: true
 }).then(con => {
 //this line has access to the password
 //  console.log(con.connections);
