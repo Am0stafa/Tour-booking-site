@@ -50,7 +50,8 @@ const toursSchema = new mongoose.Schema(
     type:Number,
     default:4.5,
     min:[1, "rating must be above one"],
-    max:[5,"rating must be below 5"]
+    max:[5,"rating must be below 5"],
+    set: val => (val).toFixed(1)
   },
   ratingQuantity:{
     type:Number,
@@ -155,6 +156,18 @@ const toursSchema = new mongoose.Schema(
     toObject:{virtuals:true},
 });
 
+
+//! to get access to all the reviews of certain tour without child refrencing
+//! the query that you want it to be on populate it first
+toursSchema.virtual('reviews',{
+  ref:'Review',
+  foreignField:'tour',//^ mesameyeno eh henak "forgein key"
+  localField:'_id'//^ mesamyeno eh hena "primary key"
+})
+
+
+
+
 //! setting indexing for fast search
 toursSchema.index({price:1,ratingsAverage:1})
 
@@ -169,13 +182,6 @@ toursSchema.virtual('durationWeek').get(function(){
   return this.duration /7;
 })
 
-//! to get access to all the reviews of certain tour without child refrencing
-//! the query that you want it to be on populate it first
-toursSchema.virtual('reviews',{
-  ref:'Review',
-  foreignField:'tour',//^ mesameyeno eh henak "forgein key"
-  localField:'_id'//^ mesamyeno eh hena "primary key"
-})
 
 //* mongoose middlewares: just like express we can use mongoose middlewares to make something happen between two events for example each time a new document is saved to database we can run a function between the save command and the acctual saving of the document thats also why mongooes middlewares are some times called pre and post hooks as we can run a function before or after an event. middlewares are defined on the schema
 //? there are four types of middlewares in mongoose: document query aggregate and model.
@@ -254,10 +260,6 @@ toursSchema.pre('aggregate',function(next) {
 });
 
 
-
-
-
-
 //after creating a schema, virtual properties , middlewares we will then create a model from the schema
 
 //here it takes the name of the model and the schema that we created and this will return an object which we can use to make documents
@@ -268,32 +270,3 @@ const Tour = mongoose.model('Tour', toursSchema);
 //we want to export the model from this file to be used in the tour controller where we will query and delete and update and create tours basically do CRUD operations.
 
 module.exports = Tour;
-
-
-
-
-
-
-
-
-
-
-
-//An example of the way we make documents in the controller files:
-
- //create a document from the model in the model file and it is like using javascript function constructor
-//       const testTour = new Tour({
-//         name:"the park camper" ,
-//         price: 20
-//       })
-
- //as this document is an instance of the tour model so it have a couple of methods on it that we can use in order to interact with the database.
- //this will save it to the tours collection in the database and this save here will return a promise which will give us access to the document that was just saved in the database.
-//       testTour.save().then(doc=>{
-//         console.log(doc)
-//       }).catch(err => console.log(err));
-
-//A second way of donig the above
-
-//the diffrence between this way and the other way is in this one we basically called the method directly on the tour while in the first version we called the method (.save()) on the new document after creating a tour object as documents has access to this method and alot of other methods as well but in the second one we call this create method on the method it self
-//Tour.create({})

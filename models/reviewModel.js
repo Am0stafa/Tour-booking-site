@@ -64,20 +64,30 @@ reviewSchema.statics.calcAverageRatings = async function(tourId){
         }
     ])//& this will return an array conataing id nRating avgRating
     
-    //! now we want to persist this stats in the tourModel
-    await Tour.findByIdAndUpdate(tourId,{ratingQuantity:stats[0].nRating,ratingAverage:stats[0].avgRating})
+    //! in case all the reviews are deleted we get an empty array and in this case we want both to return to default
+    
+    if(stats.length>0){
+        //! now we want to persist this stats in the tourModel
+        await Tour.findByIdAndUpdate(tourId,{ratingQuantity:stats[0].nRating,ratingAverage:stats[0].avgRating})
+    }else{
+        await Tour.findByIdAndUpdate(tourId,{ratingQuantity:0,ratingAverage:4.5})
+    }
 }
 
 //! now we will make the middleware as explaned above
-
+//? document middleware
 reviewSchema.post('save',function(){
     //? this points to the document(Reviews) being saved but we want to execute the calc function which is available on the model
     //! to solve this problem and point to the model eventho we still didnt declared it by using this.constructor 
-
     this.constructor.calcAverageRatings(this.tour)
-
 })
-
+//? query middleware
+reviewSchema.post(/^findOneAnd/,async function(){
+    //! here the this points to the query but in this case we need the document itself so to do this execute the query here getting the doucment 
+    const queryExec = await this.findOne();
+    //^ as we can only call aggregate on doucment 
+    queryExec.constructor.calcAverageRatings(queryExec.tour)
+})
 
 
 
