@@ -1,5 +1,6 @@
 const express = require('express');
 const morgan = require('morgan');
+const path = require('path');
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 const AppError = require('./utils/appError');
@@ -11,6 +12,16 @@ const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean')
 const hpp = require('hpp')
 const reviewRoute = require('./routes/reviewRoutes')
+const viewRouter = require('./routes/viewRouters')
+
+
+//* set templete engine 
+app.set('view engine', 'pug')
+app.set('views',path.join(__dirname,'views'))
+
+//^ Serving static files
+app.use(express.static(path.join(__dirname,'public')));
+
 
 
 //! 1) GLobal MIDDLEWARES
@@ -61,8 +72,7 @@ app.use(
   })
 );
 
-//^ Serving static files
-app.use(express.static(`${__dirname}/public`));
+
 
 //^ Test middelware
 // app.use((req, res, next) => {
@@ -78,6 +88,9 @@ app.use((req, res, next) => {
 
 
 //! 2) ROUTES
+
+app.use('/',viewRouter)
+
 //^ middleware that will be called whenever we make a call to this route
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);

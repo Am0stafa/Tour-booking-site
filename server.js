@@ -24,7 +24,7 @@ mongoose.connect(DB , {
   console.log(err)
   server.close(()=>{
     //here it takes a code 0 for successful 1 for failed
-  process.exit(1)
+    process.exit(1)
   })
 });
 
@@ -38,7 +38,7 @@ process.on('unhandledRejection', (err)=>{
   //^ this is a less aggressive way of closing the server as we will give the server time to finish all the request that are still pending or being handled at the time.
   server.close(()=>{
   //here it takes a code 0 for successful 1 for failed
-  process.exit(1)
+    process.exit(1)
   })
   
 });

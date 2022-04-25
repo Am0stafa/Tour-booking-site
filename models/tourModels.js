@@ -250,15 +250,15 @@ toursSchema.post(/^find/,function(docs,next){
 
 //*we also want to execlude all the secret tours from the aggrigation as well
 
-toursSchema.pre('aggregate',function(next) {
+// toursSchema.pre('aggregate',function(next) {
 
-  //^ this.pipeline() return us the aggrigation pipeline which is the array which we passed into the aggregate function
-  //^ unlike the find to filter out the secret tours we will add another match stage at the beginning of the pipeline array
-  //^ it is fine to as many match stages.
-  this.pipeline().unshift({ $match:{secretTour:{ $ne:true }} }) ; 
+//   //^ this.pipeline() return us the aggrigation pipeline which is the array which we passed into the aggregate function
+//   //^ unlike the find to filter out the secret tours we will add another match stage at the beginning of the pipeline array
+//   //^ it is fine to as many match stages.
+//   this.pipeline().unshift({ $match:{secretTour:{ $ne:true }} }) ; 
   
-  next();
-});
+//   next();
+// });
 
 
 //after creating a schema, virtual properties , middlewares we will then create a model from the schema

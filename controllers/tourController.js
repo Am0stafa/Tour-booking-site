@@ -2,6 +2,7 @@
 //we will import the tour model here which we made after creating the schema in the models file and this will be used to do CRUD opertaions 
 const AppError = require('../utils/appError');
 const Tour = require('./../models/tourModels')
+const catchAsync = require('./../utils/catchAsync')
 
 //middelware that interrupt the request from the tourRout for the well known routes to change the fields
 exports.aliasTopTours = (req, res, next) => {
@@ -331,7 +332,7 @@ exports.getMonthlyplan = async (req, res) => {
 
 }
 
-//! this feature so for if you want to know which tours is far from you according to circle with specified distance and unit
+//! this feature so for if you want to know which tours are within circle with specified distance and unit
 exports.getToursWithin =catchAsync(async (req, res, next) => {
     //& first we need to get our paramerters
     const {distance,latlng,unit} = req.params;
@@ -345,7 +346,7 @@ exports.getToursWithin =catchAsync(async (req, res, next) => {
        next(new AppError('Please enter your correct coordinates'),400);   
     }
   
-    //! we need to find tours inside a circle that starts at this point that we defined (latlang) and which have a radius of the distance that we defined (distance)BUT in need to be in radiant. so we need to pass this information to this mongooes geoSpatial option
+    //! we need to find tours inside a circle that starts at this point that we defined (latlang) and which have a radius of the distance that we defined (distance)BUT in need to be in radiant. so we need to pass this information to &geoSpatial option
     const tours = await Tour.find({
       startLocation: { $geoWithin: { $centerSphere: [[lng, lat], radiant] } }
     });  
@@ -358,4 +359,52 @@ exports.getToursWithin =catchAsync(async (req, res, next) => {
     });
     
   //! we finally need to index the attributes which has the geoSpatial data is stored into 2dsphere
+})
+
+
+//! if we want to know the exact distances of all the tours from a specific starting point like (user location)
+exports.getDistances = catchAsync(async (req, res, next) => {
+    const {latlng,unit} = req.params;    
+    //& then we exepet the latlng to contain cordinated
+    const [lat,lng] = latlng.split(",");
+
+    if(!lat||!lng){
+       next(new AppError('Please enter your correct coordinates'),400);   
+    }
+    
+    //& to convert the result that we get in meters to miles OR km
+    meterTomk = unit === 'mi' ? 0.000621371 : 0.001;
+
+    
+   //& for geoSpatial data we only have one single stage called geonear which require one of our fields to be geospatial index
+   const distances = await Tour.aggretage([
+    {
+      $geoNear:{
+       near:{type:point,coordiantes:[lng*1,lat*1]}, //^ which is the point from which to calculate the distances so all disances will be calculated from this point to the start location AND we need to pass it geoJSON
+       
+       distanceField:'distance',//^ this is the field that will be created and where all the calculate distances will be stored so we will simply call it distance and IT WILL BE in meters so we need to convet it
+       
+       distanceMultiplier:meterTomk//^ for convertion
+       
+      }
+    
+    },//* as the above will return alot of thing but we only want to this to we use project to specify what we want to keep
+    {
+     $project:{
+      distance:1,
+      name:1
+     }
+     //^ now we got rid of all the other data
+    }
+   ])
+   
+   
+  res.status(200).json({
+    status: 'success',
+    data: {
+      data: distances
+    }
+  });
+
+
 })

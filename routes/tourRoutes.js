@@ -20,17 +20,23 @@ router
     .route('/monthly-plan/:year')
     .get(authController.protect,authController.restictTo('admin', 'lead-guide','guide'),tourController.getMonthlyplan)
 
+//! inside this our query string must look like this ?limt=5&sort=-rateingAverage,price
+//! this middelware is prefilling the query string for the user so that the user doesn't have to do it on this own
 router
   .route('/top-5-cheap')
   .get(tourController.aliasTopTours, tourController.getAllTours);
-  //! inside this our query string must look like this ?limt=5&sort=-rateingAverage,price
-  //! this middelware is prefilling the query string for the user so that the user doesn't have to do it on this own
+
 
 //^ tour-within/distance=233&center=-40,45&unit=mi rather than making it as a query it will look like this
 //^ tour-within/233/center/-40,45/uniy/mi
 router
   .route('/tour-within/:distance/center/:latlng/unit/:unit')
   .get(tourController.getToursWithin)
+
+
+router
+  .route('/distance/:latlng/unit/:unit')
+  .get(tourController.getDistances)
 
 router
   .route('/')
