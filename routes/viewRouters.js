@@ -11,7 +11,7 @@ const router = express.Router();
 
 
 router.get('/',viewcontroller.getOverview)
-router.get('/tour',viewcontroller.getTour)
+router.get('/tour/:slug',viewcontroller.getTour)
   
 
 
