@@ -202,11 +202,13 @@ exports.protect = catchAsync(async (req, res, next) => {
     let token =''; 
     
     //^ 1)Get the token and check if its there
-        //? there is a stander when sending JWT in the request header which is to name the key as authorization and the value to start with bearer
+        //& there is a stander when sending JWT in the request header which is to name the key as authorization and the value to start with bearer
         if(req.headers.authorization && req.headers.authorization.startsWith('Bearer')){
             //* only in that case we want to save the token and to remove bearer split the array and take the second half
              token = req.headers.authorization.split(' ')[1]; 
         }
+        else if(req.cookie.jwt) token = req.cookie.jwt //^ so that if it exist in the cookie then we want the cookie to be that
+        
         //? and if the token doesnt exist we want to create a new error
         if(!token) return next(new AppError('You are not logged in please log in to get access',401))
      
