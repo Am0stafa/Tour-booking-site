@@ -1,24 +1,28 @@
 export const displayMap = locations => {
-    mapboxgl.accessToken =
-      'pk.eyJ1Ijoiam9uYXNzY2htZWR0bWFubiIsImEiOiJjam54ZmM5N3gwNjAzM3dtZDNxYTVlMnd2In0.ytpI7V7w7cyT1Kq5rT9Z1A';
-  
-    var map = new mapboxgl.Map({
-      container: 'map',
-      style: 'mapbox://styles/jonasschmedtmann/cjvi9q8jd04mi1cpgmg7ev3dy',
-      scrollZoom: false
-      // center: [-118.113491, 34.111745],
-      // zoom: 10,
-      // interactive: false
+
+    mapboxgl.accessToken = 'pk.eyJ1IjoiMHhhYmRvbW9zdGFmYSIsImEiOiJjbDJpbHgxN3owcDJwM2hsNXBhN3Mxa2xjIn0.BrjOiPTeiHvJu3r1w5PL_A';
+    
+    const map = new mapboxgl.Map({
+      container: 'map', // container ID
+      style: 'mapbox://styles/0xabdomostafa/cl2imieij007b14o6a1cl9vb7', // style URL
+      scrollZoom: false,
+      //  center: [-74.5, 40], // starting position [lng, lat]
+      //  zoom: 9 // starting zoom
     });
-  
+    
+    //! what we basically want to do is put all the locations for a certain tour on the map and then the map will fit all this points by creating a bound variable which will be the area that will be displayed on the map; and we get access to this mapboxgl object as we included it at the beginning of our page.
+    
+    
     const bounds = new mapboxgl.LngLatBounds();
   
+    //^ now we loop over the locations and make a mark above each one
+  
     locations.forEach(loc => {
-      // Create marker
+      //& Create marker
       const el = document.createElement('div');
       el.className = 'marker';
   
-      // Add marker
+      //& Add marker
       new mapboxgl.Marker({
         element: el,
         anchor: 'bottom'
@@ -26,18 +30,25 @@ export const displayMap = locations => {
         .setLngLat(loc.coordinates)
         .addTo(map);
   
-      // Add popup
+      //* here we create a pop up which will display information about the location above the mark and it is a bit similar to creating a marker
+    
+      //& Add popup
       new mapboxgl.Popup({
-        offset: 30
+        //^ to fix a bug which is that the pop up over lap th marker to we want to move it up
+        offset: 32
       })
         .setLngLat(loc.coordinates)
         .setHTML(`<p>Day ${loc.day}: ${loc.description}</p>`)
         .addTo(map);
-  
-      // Extend map bounds to include current location
+        
+    
+      //? the last thing we need to to
+      //& Extend map bounds to include current location
       bounds.extend(loc.coordinates);
     });
-  
+    
+    //! we need to make sure that the map fits the bound and what will this do is moves and zooms the mapp right to the bounds to fit our markers
+    
     map.fitBounds(bounds, {
       padding: {
         top: 200,
