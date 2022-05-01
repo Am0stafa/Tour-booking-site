@@ -7,6 +7,7 @@ const jwt = require('jsonwebtoken');
 const AppError = require('../utils/appError');
 const sendMail = require('../utils/email')
 const crypto = require('crypto');
+const { promisify } = require('util');
 
 let cookieOptions={
     expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRE_IN*24*60*60*1000),
@@ -88,7 +89,10 @@ exports.login = catchAsync(async (req, res, next) => {
     
     res.status(200).json({
         status: 'success',
-        token 
+        token,
+        data:{
+            user
+        }
     })
 
 });
@@ -159,7 +163,10 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
         
         res.status(200).json({
             status: 'success',
-            token 
+            token,
+            data:{
+                user
+            }
         })
 
     
@@ -189,7 +196,10 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
         
         res.status(200).json({
             status: 'success',
-            token 
+            token,
+            data:{
+                user
+            }
         })
 
 });
@@ -245,5 +255,40 @@ exports.restictTo = (...roles) =>{
     };    
 
 };
+
+//! middleware to constantly check if the user is logged in
+//* Only for rendered pages, no errors!
+exports.isLoggedIn = async (req, res, next) => {
+
+    if (req.cookies.jwt) {
+    
+   
+      try {
+        //& 1) verify token
+        const decoded = await promisify(jwt.verify)(
+            req.cookies.jwt,
+            process.env.JWT_SECRET
+          );
+
+        //& 2) Check if user still exists
+        const currentUser = await User.findById(decoded.id);
+        if (!currentUser) {
+          return next();
+        }
+
+
+        //& THERE IS A LOGGED IN USER
+        //* we want to make the user accessable to the template as every pug templet will have access to res.locals so it is like passing data into the render function
+
+        res.locals.user = currentUser;
+        return next();
+      } 
+      catch (err) {
+        return next();
+      }
+      
+    }
+    next();
+  };
 
 
