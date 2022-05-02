@@ -1,13 +1,17 @@
-export const displayMap = locations => {
+import mapboxgl from 'mapbox-gl';
 
-    mapboxgl.accessToken = 'pk.eyJ1IjoiMHhhYmRvbW9zdGFmYSIsImEiOiJjbDJpbWFrd2QwaGpoM2pxNm03ZTd0djczIn0.bBuPr0SL-bzhwsRHiQOKxg';
+import 'mapbox-gl/dist/mapbox-gl.css';
+
+export const displayMap = (locations) => {
+
+    mapboxgl.accessToken = 'pk.eyJ1IjoiMHhhYmRvbW9zdGFmYSIsImEiOiJjbDJpbHgxN3owcDJwM2hsNXBhN3Mxa2xjIn0.BrjOiPTeiHvJu3r1w5PL_A';
     
     const map = new mapboxgl.Map({
       container: 'map', // container ID
       style: 'mapbox://styles/mapbox/streets-v11', // style URL
       scrollZoom: false,
       //  center: [-74.5, 40], // starting position [lng, lat]
-      //  zoom: 9 // starting zoom
+       zoom: 15 // starting zoom
     });
     
     //! what we basically want to do is put all the locations for a certain tour on the map and then the map will fit all this points by creating a bound variable which will be the area that will be displayed on the map; and we get access to this mapboxgl object as we included it at the beginning of our page.
@@ -33,10 +37,8 @@ export const displayMap = locations => {
       //* here we create a pop up which will display information about the location above the mark and it is a bit similar to creating a marker
     
       //& Add popup
-      new mapboxgl.Popup({
-        //^ to fix a bug which is that the pop up over lap th marker to we want to move it up
-        offset: 32
-      })
+
+      new mapboxgl.Popup({offset: 30})
         .setLngLat(loc.coordinates)
         .setHTML(`<p>Day ${loc.day}: ${loc.description}</p>`)
         .addTo(map);
@@ -51,8 +53,8 @@ export const displayMap = locations => {
     
     map.fitBounds(bounds, {
       padding: {
-        top: 200,
-        bottom: 150,
+        top: 50,
+        bottom: 50,
         left: 100,
         right: 100
       }
