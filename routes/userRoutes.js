@@ -1,13 +1,6 @@
 const express = require('express');
 const userController = require('../controllers/userController');
 const authController = require('../controllers/authController');
-const multer = require('multer')
-
-
-//! configure multer upload which specify the destination to the folder where we want to save all the images that are being uploaded
-const upload = multer({dest:'public/img/users'}) //^ this will make the file saved in a directory in our file system
-//? then we use this upload as an middleware with the name of the field in the form which is going to hold the image
-
 
 const router = express.Router();
 
@@ -25,7 +18,7 @@ router.patch('/restpassword/:token',authController.resetPassword)
 //! as middlewares are passed by sequance after this line all routes will run this middlware first
 
 router.patch('/updatepassword',authController.protect,authController.updatePassword)
-router.patch('/updateme',upload.single('photo'),authController.protect,userController.updateMe)
+router.patch('/updateme',userController.uploadUserPhoto,userController.resizeUserPhoto,authController.protect,userController.updateMe)
 router.delete('/deleteme',authController.protect,userController.deleteMe)
 router.get('/me',authController.protect,userController.getMe,userController.getUser)
 
