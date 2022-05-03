@@ -17,8 +17,8 @@ mongoose.connect(DB , {
   useFindAndModify:true, 
   useUnifiedTopology: true
 }).then(con => {
-//this line has access to the password
-//  console.log(con.connections);
+  // this line has access to the password
+  //  console.log(con.connections);
   console.log("DB is connection successful");
 }).catch(err=>{
   console.log(err)

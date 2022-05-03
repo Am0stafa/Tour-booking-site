@@ -26,4 +26,4 @@ if (loginForm)
   const password = document.getElementById('password').value;
   login(email, password);
 });
-  
+if (logOutBtn) logOutBtn.addEventListener('click', logout);

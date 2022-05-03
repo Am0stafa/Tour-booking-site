@@ -97,6 +97,24 @@ exports.login = catchAsync(async (req, res, next) => {
 
 });
 
+exports.logout = catchAsync(async (req, res, next) => {
+    //! on the response we set the cookie and give it the exact same name but without the token and with very little short expire
+    
+    res.cookie('jwt','loggedout hhhhh',{
+        expires: new Date(Date.now() + 1000*10),
+        httpOnly:true
+    })
+
+    res.status(200).json({
+        status: 'success'
+    })
+
+})
+
+
+
+
+
 //! which will resive the email adderss
 exports.forgetPassword = catchAsync(async (req, res, next) => {
     //^ 1)Get user based on POSTed email

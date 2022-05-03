@@ -7,6 +7,7 @@ const router = express.Router();
 //auth
 router.post('/signup',authController.signup)
 router.post('/login',authController.login)
+router.get('/logout',authController.logout)
 router.post('/forgotpassword',authController.forgetPassword)
 //? PATCH as the result of this will be the modification of the password property
 router.patch('/restpassword/:token',authController.resetPassword)
