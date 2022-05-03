@@ -237,12 +237,12 @@ toursSchema.pre(/^find/,function(next){
 
 //* here we are making a clock that calculate how long it will take to execute the query
 
-toursSchema.post(/^find/,function(docs,next){
+toursSchema.post(/^find/,function(){
   //^ here the this keyword will return us all the documents that will return from the query as the query has been finished.
-  //! in post we cant use this insted it will pass us the document that had been saved (docs)
-  console.log(`Query took ${Date.now() - docs.start} milisec`);
   
-  next();
+  console.log(`Query took ${Date.now() - this.start} milisec`);
+  
+
 });
 
 

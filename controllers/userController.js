@@ -6,12 +6,12 @@ const factory = require('./handlerFactory')
 
 
 const filterObj = (obj,...allowed)=>{
-    const result = {};
-    Object.keys(obj).forEach((el)=>{
-        if(allowed.includes(el))
-          result[el] = obj[el]
-    })
-    return result;
+  const result = {};
+  Object.keys(obj).forEach((el)=>{
+      if(allowed.includes(el))
+        result[el] = obj[el]
+  })
+  return result;
 }
 
 
@@ -22,7 +22,7 @@ exports.updateMe = catchAsync(async (req, res, next) => {
   
   //& to remove any unwated thing from the body
   
-  filteredObject = filterObj(req.body,'name','email')
+ const filteredObject = filterObj(req.body,'name','email')
   
   const updatedUser = await User.findByIdAndUpdate(req.user.id,filteredObject,{
     new:true,
@@ -41,8 +41,8 @@ exports.updateMe = catchAsync(async (req, res, next) => {
 //! get my user information from currently logged in user in the request by making an middleware to put the userId on params from the req
 //^ now run this middleware after cheching for authentication to get personal information
 exports.getMe = (req ,res, next)=>{
-req.params.id = req.user.id
-next()
+  req.params.id = req.user.id
+  next()
 }
 
 

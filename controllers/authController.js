@@ -29,7 +29,7 @@ exports.signup = catchAsync(async (req, res, next) => {
                                        email:req.body.email,
                                        password:req.body.password,
                                        passwordConfirm:req.body.passwordConfirm,
-                                       role:req.body.role});
+                                       });
     //*automatically sign in
                                       
     //^ creating the token by making the payload the id of the user and the securet to be a secret string from the .env, and object of options such as expire time to logout the user after cirtain time as this token wont be valid after time pass also from .env
@@ -235,7 +235,7 @@ exports.protect = catchAsync(async (req, res, next) => {
             //* only in that case we want to save the token and to remove bearer split the array and take the second half
              token = req.headers.authorization.split(' ')[1]; 
         }
-        else if(req.cookie.jwt) token = req.cookie.jwt //^ so that if it exist in the cookie then we want the cookie to be that
+        else if(req.cookies.jwt) token = req.cookies.jwt //^ so that if it exist in the cookie then we want the cookie to be that
         
         //? and if the token doesnt exist we want to create a new error
         if(!token) return next(new AppError('You are not logged in please log in to get access',401))
@@ -257,6 +257,7 @@ exports.protect = catchAsync(async (req, res, next) => {
    
    //! put the user in the request so that we can use it in the next middleware function as we cant get the user by searching by his id which we get from the params
     req.user = currUser;
+    res.locals.user = currUser;
     next();
 } )
 

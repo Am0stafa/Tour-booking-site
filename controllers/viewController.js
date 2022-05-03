@@ -13,8 +13,6 @@ exports.getOverview = catchAsync(async (req, res, next) => {
       tours
     });
 });
-  
-
 
 exports.getTour = catchAsync(async (req, res, next) => {
     //! 1) Get the data, for the requested tour (including reviews and guides)
@@ -40,5 +38,38 @@ exports.getLoginForm = catchAsync(async (req, res, next) => {
     title: 'Log into your account'
   });
 });
-
+exports.getAccount = catchAsync(async (req, res, next) => {
+  res.status(200).render('account', {
+    title: 'your account info'
+  });
   
+});
+
+//! this one here is for the rendered website but for using axios we use the normal ones in the user routes
+exports.updateUserData = catchAsync(async (req, res, next) => {
+  const updatedUser = await User.findByIdAndUpdate(
+    req.user.id,
+    {
+      name: req.body.name,
+      email: req.body.email
+    },
+    {
+      new: true,
+      runValidators: true
+    }
+  );
+ //! rerender the page again with the new user so we pass the updated user
+  res.status(200).render('account', {
+    title: 'Your account',
+    user: updatedUser
+  });
+});
+
+exports.getSingupForm = catchAsync(async (req, res, next) => {
+
+  res.status(200).render('signup', {
+    title: 'create your account!'
+  });
+
+
+});

@@ -55,6 +55,8 @@ app.use(express.json());
 app.use(cookieParser());
 
 
+//& to pase data coming form URL encoded form
+app.use(express.urlencoded({ extended:true }))
 
 //^ Data santitization aginst NoSql query injection
 //& it looks at the request body, the request query string and also the request params THEN it will basically filter out all of the doller sign and dots as this is how mongodb operator are writtern
