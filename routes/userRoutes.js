@@ -18,7 +18,12 @@ router.patch('/restpassword/:token',authController.resetPassword)
 //! as middlewares are passed by sequance after this line all routes will run this middlware first
 
 router.patch('/updatepassword',authController.protect,authController.updatePassword)
-router.patch('/updateme',userController.uploadUserPhoto,userController.resizeUserPhoto,authController.protect,userController.updateMe)
+
+router.patch('/updateme',authController.protect,
+  userController.uploadUserPhoto,
+  userController.resizeUserPhoto,
+  userController.updateMe)
+
 router.delete('/deleteme',authController.protect,userController.deleteMe)
 router.get('/me',authController.protect,userController.getMe,userController.getUser)
 

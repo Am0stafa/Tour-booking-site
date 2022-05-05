@@ -3,6 +3,9 @@
 const AppError = require('../utils/appError');
 const Tour = require('./../models/tourModels')
 const catchAsync = require('./../utils/catchAsync')
+const APIFeatchers = require('./../utils/apiFeatures')
+const multer = require('multer')
+const sharp = require('sharp');
 
 //middelware that interrupt the request from the tourRout for the well known routes to change the fields
 exports.aliasTopTours = (req, res, next) => {
@@ -11,8 +14,6 @@ exports.aliasTopTours = (req, res, next) => {
   req.query.fields = 'name,price,ratingsAverage,summary,difficulty';
   next();
 };
-//getting the api featurs class which contain the query functions filter , sort , limit , paginate
-const APIFeatchers = require('./../utils/apiFeatures')
 
 
 exports.getAllTours = async (req, res) => {
@@ -408,3 +409,58 @@ exports.getDistances = catchAsync(async (req, res, next) => {
 
 
 })
+
+
+const multerStorage = multer.memoryStorage();
+
+const multerFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith('image')) {
+    cb(null, true);
+  } else {
+    cb(new AppError('Not an image! Please upload only images.', 400), false);
+  }
+};
+
+
+//& this middleware will also put teh file and some information about the file on the request object
+const upload = multer({
+  storage: multerStorage,
+  fileFilter: multerFilter
+});
+
+exports.uploadTourPhoto = upload.fields([{name: 'imageCover', maxCount: 1}, {name: 'image', maxCount: 3}]);
+
+exports.resizeTourPhoto = catchAsync(async (req, res, next) => {
+  if (!req.files) return next();
+
+  //* 1) imageCover
+  const coverName = `tour-${req.params.id}-${Date.now()}-cover.jpeg`;
+
+  await sharp(req.files.imageCover[0].buffer)
+    .resize(2000, 1333)
+    .toFormat('jpeg')
+    .jpeg({ quality: 90 })
+    .toFile(`public/img/tours/${coverName}`);
+  
+  //^ so that the name is persisted in the database when updating we simple add the name to the body
+  req.body.imageCover = coverName;
+  
+  
+  //* 2) images
+  req.body.image = []
+  
+  promimseArray = req.files.image.map(async (file,index)=>{
+    const name = `tour-${req.params.id}-${Date.now()}-${index+1}.jpeg`;
+
+    await sharp(file.buffer)
+      .resize(2000, 1333)
+      .toFormat('jpeg')
+      .jpeg({ quality: 90 })
+      .toFile(`public/img/tours/${name}`);
+      
+    req.body.image.push(name)
+  })
+  await Promise.all(promimseArray);
+  
+  next();
+});
