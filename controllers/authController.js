@@ -8,6 +8,7 @@ const AppError = require('../utils/appError');
 const sendMail = require('../utils/email')
 const crypto = require('crypto');
 const { promisify } = require('util');
+const Email = require('../utils/email')
 
 let cookieOptions={
     expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRE_IN*24*60*60*1000),
@@ -30,6 +31,11 @@ exports.signup = catchAsync(async (req, res, next) => {
                                        password:req.body.password,
                                        passwordConfirm:req.body.passwordConfirm,
                                        });
+    //& send el ta7ya                                   
+    const url = `${req.protocol}://${req.get('host')}/me`;
+   
+    await new Email(newUser, url).sendWelcome();                  
+    
     //*automatically sign in
                                       
     //^ creating the token by making the payload the id of the user and the securet to be a secret string from the .env, and object of options such as expire time to logout the user after cirtain time as this token wont be valid after time pass also from .env
@@ -131,16 +137,11 @@ exports.forgetPassword = catchAsync(async (req, res, next) => {
     //& to work on development and production
     const resetURL = `${req.protocol}://${req.get('host')}/api/v1/users/restpassword/${resetToken}`
     
-    const message = `Forgot your password? Submit a PATCH request with your new password and passwordConfirm to: ${resetURL}.\nIf you didn't forget your password, please ignore this email!`;
-    
     
     //? we will make a try catch here as we want to do more than just send the user an error
+    
     try{
-       await sendMail({
-        email:req.body.email,
-        subject:'Your password reset token is only valid for 10 minuts!!!',
-        message
-       })
+        await new Email(user, resetURL).sendPasswordReset(); 
     }catch(err){
         //! incase of error we want to do two thing 1.reset the token 2.reset the expires property
         user.passwordResetToken = undefined
