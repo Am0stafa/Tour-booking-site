@@ -4,6 +4,8 @@ const catchAsync = require('./../utils/catchAsync')
 const APIFeatchers = require('./../utils/apiFeatures')
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY)
 const Booking = require('../models/bookingModel');
+const factory = require('./handlerFactory');
+
 
 exports.getCheckoutSession = catchAsync(async (req, res, next) => {
     //! 1) first we have to find that tour in the database  
@@ -15,7 +17,7 @@ exports.getCheckoutSession = catchAsync(async (req, res, next) => {
     const session = await stripe.checkout.sessions.create({
         payment_method_types:['card'],
         //! as we dont have access the the yello expet using webhooks we added all the variables that we need to create a new booking to the success url
-        success_url: `${req.protocol}://${req.get('host')}/?tour=${req.params.tourId}&user=${req.user.id}&price=${tour.price}`,
+        success_url: `${req.protocol}://${req.get('host')}/my-tours/?tour=${req.params.tourId}&user=${req.user.id}&price=${tour.price}`,
         cancel_url: `${req.protocol}://${req.get('host')}/tour/${tour.slug}`,
         customer_email: req.user.email, 
         //^ this field is going to allow us to pass some data about the session that we are currently creating as once the purchase is successful we will get access to the session object again and by then we want to create a new booking in the db to create it we need userId,tourId,price: we have access to the user email so we can recreate the userId, soo all thats missing is the tourId which is specified here
@@ -60,9 +62,24 @@ exports.createbookingChechout =catchAsync(async (req, res, next) => {
 
 
 
+exports.getall = async (req, res, next) => {
+
+  const bookings = await Booking.find({user:"5c8a1d5b0190b214360dc057"});
+  
+  
+  res.status(200).json({
+    status: 'success',
+    bookings
+  });
+
+}
 
 
-
+exports.createBooking = factory.createOne(Booking);
+exports.getBooking = factory.getOne(Booking);
+exports.updateBooking = factory.updateOne(Booking);
+exports.deleteBooking = factory.deleteOne(Booking);
+exports.getAllBookings = factory.getAll(Booking);
 
 
 

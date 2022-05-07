@@ -1,5 +1,6 @@
 const catchAsync = require('../utils/catchAsync')
 const Tour = require('./../models/tourModels')
+const Booking = require('./../models/bookingModel')
 
 
 exports.getOverview = catchAsync(async (req, res, next) => {
@@ -71,5 +72,30 @@ exports.getSingupForm = catchAsync(async (req, res, next) => {
     title: 'create your account!'
   });
 
+
+});
+
+exports.getMyTours =  catchAsync(async (req, res, next) => {
+  //! find all the tours that the user has booked by finding all the bookings for the currently loged in users which will then give us a bunch of tourIds and then we have to find the tours with thoseIds
+  
+    //& 1) Find all bookings
+    const bookings = await Booking.find({ user: req.user.id });
+
+    //& 2) Find tours with the returned IDs
+    const tourIDs = bookings.map(el => el.tour);
+    const tours = await Tour.find({ _id: { $in: tourIDs } });
+    
+    if (bookings.length === 0) {
+      res.status(200).render('nullbooking', {
+        title: 'Book Tours',
+        headLine: `You haven't booked any tours yet!`,
+        msg: `Please book a tour and come back. 🙂`
+      });
+    } else {
+      res.status(200).render('overview', {
+        title: 'My Tours',
+        tours
+      });
+    }
 
 });
