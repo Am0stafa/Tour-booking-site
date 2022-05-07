@@ -13,8 +13,9 @@ const xss = require('xss-clean')
 const hpp = require('hpp')
 const reviewRoute = require('./routes/reviewRoutes')
 const viewRouter = require('./routes/viewRouters')
+const bookingRoutes = require('./routes/bookingRoutes')
 const cookieParser = require('cookie-parser')
-
+const cors = require('cors');
 //* set templete engine 
 app.set('view engine', 'pug')
 app.set('views',path.join(__dirname,'views'))
@@ -25,15 +26,25 @@ app.use(express.static(path.join(__dirname,'public')));
 
 
 //! 1) GLobal MIDDLEWARES
+app.use(cors());
+app.options('*', cors());
+app.options('/api/v1/tours/:id', cors());
 
+app.use(cors({
+  origin: 'https://www.natours.com'
+}))
 //^ Development logging
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
 //^ Set secure HTTP header
-app.use(helmet())
-
+app.use(
+  helmet({
+    crossOriginEmbedderPolicy: false,
+    
+  })
+);
 //^ Simit requests from same ip
 //& rateLimit is a function which takes as input object of options
 const limiter = rateLimit({
@@ -103,6 +114,7 @@ app.use('/',viewRouter)
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/reviews', reviewRoute);
+app.use('/api/v1/bookings', bookingRoutes);
 
 //^ what we want to implement is a route handler for a route that was not cached by any of  our route handlers
 //* since the code is executed are executed in order so if we have a request that makes it into this point here of our code this means that non of the above where able to catch it.
