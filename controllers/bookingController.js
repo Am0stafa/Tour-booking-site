@@ -40,7 +40,6 @@ exports.getCheckoutSession = catchAsync(async (req, res, next) => {
 
 })
 
-
 //! we want to create a new booking on this home url{success_url} as this is the url which is called whenever a purchase is successful so what we need to do 
 exports.createbookingChechout = (req,res,next) => {
   const {tour,user,price} = req.params
