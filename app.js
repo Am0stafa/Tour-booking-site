@@ -11,6 +11,7 @@ const helmet = require("helmet");
 const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean')
 const hpp = require('hpp')
+const compression = require('compression');
 const reviewRoute = require('./routes/reviewRoutes')
 const viewRouter = require('./routes/viewRouters')
 const bookingRoutes = require('./routes/bookingRoutes')
@@ -42,7 +43,6 @@ if (process.env.NODE_ENV === 'development') {
 app.use(
   helmet({
     crossOriginEmbedderPolicy: false,
-    
   })
 );
 //^ Simit requests from same ip
@@ -65,6 +65,7 @@ app.use(express.json());
 //! to get access to the cookies that are in our request by parsing all the cookies in an incoming requests
 app.use(cookieParser());
 
+app.use(compression());
 
 //& to pase data coming form URL encoded form
 app.use(express.urlencoded({ extended:true }))

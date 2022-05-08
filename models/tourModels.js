@@ -240,7 +240,7 @@ toursSchema.pre(/^find/,function(next){
 toursSchema.post(/^find/,function(){
   //^ here the this keyword will return us all the documents that will return from the query as the query has been finished.
   
-  console.log(`Query took ${Date.now() - this.start} milisec`);
+  //console.log(`Query took ${Date.now() - this.start} milisec`);
   
 
 });
