@@ -21,4 +21,7 @@ config.env
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-.cache
+*.env
+.cache/
+config/
+dist
