@@ -9,8 +9,8 @@ const app = express();
 const rateLimit = require('express-rate-limit')
 const helmet = require("helmet");
 const mongoSanitize = require('express-mongo-sanitize');
-// const xss = require('xss-clean')
-// const hpp = require('hpp')
+const xss = require('xss-clean')
+const hpp = require('hpp')
 const compression = require('compression');
 const reviewRoute = require('./routes/reviewRoutes')
 const viewRouter = require('./routes/viewRouters')
@@ -28,13 +28,12 @@ app.use(express.static(path.join(__dirname,'public')));
 app.enable('trust proxy');
 
 //! 1) GLobal MIDDLEWARES
-app.use(cors());
-app.options('*', cors());
-app.options('/api/v1/tours/:id', cors());
 
-app.use(cors({
-  origin: 'https://www.natours.com'
-}))
+//~ this added access-control-allow-origon-header to all requests no matter
+app.use(cors());
+//? for non simple request such as delete put etc the server will send an options request
+app.options('*', cors());
+
 //^ Development logging
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
@@ -77,21 +76,21 @@ app.use(mongoSanitize())
 
 //^ Data santitization aginst against XXS
 //& this will then clean ant user input from malicious HTML code
-// app.use(xss())
+app.use(xss())
 
 //^ Pervent parametere pollution
-// app.use(
-//   hpp({
-//     whitelist: [
-//       'duration',
-//       'ratingsQuantity',
-//       'ratingsAverage',
-//       'maxGroupSize',
-//       'difficulty',
-//       'price'
-//     ]
-//   })
-// );
+app.use(
+  hpp({
+    whitelist: [
+      'duration',
+      'ratingsQuantity',
+      'ratingsAverage',
+      'maxGroupSize',
+      'difficulty',
+      'price'
+    ]
+  })
+);
 
 
 
