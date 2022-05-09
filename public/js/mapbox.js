@@ -4,7 +4,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 
 export const displayMap = (locations) => {
 
-    mapboxgl.accessToken = 'pk.eyJ1IjoiMHhhYmRvbW9zdGFmYSIsImEiOiJjbDJpbHgxN3owcDJwM2hsNXBhN3Mxa2xjIn0.BrjOiPTeiHvJu3r1w5PL_A';
+    mapboxgl.accessToken = 'pk.eyJ1IjoiMHhhYmRvbW9zdGFmYSIsImEiOiJjbDJpbWFrd2QwaGpoM2pxNm03ZTd0djczIn0.bBuPr0SL-bzhwsRHiQOKxg';
     
     const map = new mapboxgl.Map({
       container: 'map', // container ID
