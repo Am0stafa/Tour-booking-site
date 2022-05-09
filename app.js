@@ -10,7 +10,7 @@ const rateLimit = require('express-rate-limit')
 const helmet = require("helmet");
 const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean')
-const hpp = require('hpp')
+// const hpp = require('hpp')
 const compression = require('compression');
 const reviewRoute = require('./routes/reviewRoutes')
 const viewRouter = require('./routes/viewRouters')
@@ -79,18 +79,18 @@ app.use(mongoSanitize())
 app.use(xss())
 
 //^ Pervent parametere pollution
-app.use(
-  hpp({
-    whitelist: [
-      'duration',
-      'ratingsQuantity',
-      'ratingsAverage',
-      'maxGroupSize',
-      'difficulty',
-      'price'
-    ]
-  })
-);
+// app.use(
+//   hpp({
+//     whitelist: [
+//       'duration',
+//       'ratingsQuantity',
+//       'ratingsAverage',
+//       'maxGroupSize',
+//       'difficulty',
+//       'price'
+//     ]
+//   })
+// );
 
 
 
