@@ -87,7 +87,10 @@ class APIFeatchers{
         const limit = this.queryString.limit*1 || 100;
         const skip = (page-1)*limit;  
         this.query = this.query.skip(skip).limit(limit);
-        
+        // start from = skip
+        //end at = limit
+    
+    
           // validation in case the user tried to access a page that doesnt exist
         // if(this.queryString.page){
           // if the number of documents that are skiped is grater than the number of documents that actually exist that mean that the page doesn't exist
