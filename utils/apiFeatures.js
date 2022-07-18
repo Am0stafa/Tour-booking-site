@@ -88,7 +88,7 @@ class APIFeatchers{
         const skip = (page-1)*limit;  
         this.query = this.query.skip(skip).limit(limit);
         // start from = skip
-        //end at = limit
+        // end at = limit
     
     
           // validation in case the user tried to access a page that doesnt exist
