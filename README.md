@@ -25,7 +25,6 @@
 ## Deployed Version
 Live demo (Feel free to visit) 👉 : https://ame-natours.herokuapp.com
 
-
 ## Key Features
 
 * Authentication and Authorization
